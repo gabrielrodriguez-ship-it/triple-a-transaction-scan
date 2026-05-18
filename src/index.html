@@ -1,0 +1,2837 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Triple-A Scan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── Design tokens ──────────────────────────────────── */
+    :root {
+      --bg:       #090d14;
+      --bg2:      #0e1420;
+      --card:     #111827;
+      --card2:    #0f1520;
+      --border:   #1e2d46;
+      --border2:  #162038;
+      --fg:       #dde6f5;
+      --fg2:      #8fa3be;
+      --fg3:      #556070;
+      --muted:    #516070;
+
+      --accent:   #ff6a00;
+      --accentLo: rgba(255,106,0,.12);
+      --accentMd: rgba(255,106,0,.25);
+
+      --ok:       #3ecf8e;
+      --okBg:     rgba(62,207,142,.1);
+      --okBorder: rgba(62,207,142,.3);
+      --warn:     #f59e0b;
+      --warnBg:   rgba(245,158,11,.1);
+      --warnBorder: rgba(245,158,11,.3);
+      --danger:   #f87171;
+      --dangerBg: rgba(248,113,113,.1);
+      --dangerBorder: rgba(248,113,113,.3);
+      --info:     #60a5fa;
+      --infoBg:   rgba(96,165,250,.1);
+      --infoBorder: rgba(96,165,250,.3);
+
+      /* Network accent colours */
+      --c-bitcoin:   #f7931a;
+      --c-ethereum:  #627eea;
+      --c-polygon:   #8247e5;
+      --c-arbitrum:  #28a0f0;
+      --c-tron:      #ef0027;
+      --c-solana:    #9945ff;
+      --c-lightning: #f89c27;
+      --c-evm:       #627eea;
+
+      --shadow:     0 16px 48px rgba(0,0,0,.55);
+      --shadowCard: 0 4px 16px rgba(0,0,0,.35);
+      --radius:     14px;
+      --radiusSm:   8px;
+
+      --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+      --transition: .14s ease;
+    }
+
+    [data-theme="light"] {
+      --bg:       #f3f5f9;
+      --bg2:      #ebeef4;
+      --card:     #ffffff;
+      --card2:    #f8fafd;
+      --border:   #dde3ed;
+      --border2:  #e6ebf4;
+      --fg:       #0f1724;
+      --fg2:      #4a5568;
+      --fg3:      #8898aa;
+      --muted:    #8898aa;
+      --ok:       #059669;
+      --okBg:     rgba(5,150,105,.08);
+      --okBorder: rgba(5,150,105,.25);
+      --warn:     #d97706;
+      --warnBg:   rgba(217,119,6,.08);
+      --warnBorder: rgba(217,119,6,.25);
+      --danger:   #dc2626;
+      --dangerBg: rgba(220,38,38,.08);
+      --dangerBorder: rgba(220,38,38,.25);
+      --shadow:   0 8px 28px rgba(10,20,60,.10);
+      --shadowCard: 0 2px 10px rgba(10,20,60,.07);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 20px 16px 56px;
+    }
+
+    /* ─── Header ──────────────────────────────────────────── */
+    .header {
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,106,0,.18);
+      background:
+        radial-gradient(ellipse 900px 320px at 15% -20%, rgba(255,59,48,.32), transparent 60%),
+        radial-gradient(ellipse 700px 300px at 80% 20%,  rgba(255,79,163,.22), transparent 60%),
+        linear-gradient(135deg, rgba(255,59,48,.28) 0%, rgba(255,106,0,.22) 50%, rgba(255,79,163,.18) 100%),
+        var(--bg2);
+    }
+
+    .headerInner {
+      padding: 20px 22px 18px;
+      backdrop-filter: blur(12px);
+      background: rgba(9,13,20,.52);
+    }
+    [data-theme="light"] .headerInner { background: rgba(255,255,255,.78); }
+
+    .topRow {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .brand { display: flex; align-items: center; gap: 13px; }
+
+    .logo {
+      width: 44px; height: 44px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: white;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .logo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .titleBlock h1 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      line-height: 1.15;
+    }
+    .titleBlock .sub {
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--fg2);
+      opacity: .8;
+    }
+
+    .headerActions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* ─── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      padding: 8px 13px;
+      border-radius: var(--radiusSm);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: var(--font-body);
+      font-weight: 500;
+      transition: background var(--transition), border-color var(--transition), transform .08s ease;
+      user-select: none;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .btn:hover { background: var(--card2); border-color: var(--fg3); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #ff3b30, #ff6a00, #ff4fa3);
+      border-color: transparent;
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.08); background: linear-gradient(90deg, #ff3b30, #ff6a00, #ff4fa3); }
+
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+
+    /* ─── Input panel ─────────────────────────────────────── */
+    .panel {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadowCard);
+    }
+    .panelBody { padding: 16px; }
+
+    .inputRow {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+
+    .inputWrap {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    input, select, textarea {
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      color: var(--fg);
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color var(--transition);
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accentLo);
+    }
+    [data-theme="light"] input,
+    [data-theme="light"] select,
+    [data-theme="light"] textarea { background: #fff; }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      display: none;
+      line-height: 1.4;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+    }
+
+    select { min-width: 220px; flex-shrink: 0; cursor: pointer; }
+
+    .btnRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    /* ─── Status row ──────────────────────────────────────── */
+    .statusRow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-top: 12px;
+      min-height: 26px;
+    }
+    .classificationBadges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .agentHint { font-size: 12px; color: var(--fg2); }
+
+    /* ─── Pill / badge system ─────────────────────────────── */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--fg2);
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+    .pill-ok     { color: var(--ok);     background: var(--okBg);     border-color: var(--okBorder); }
+    .pill-warn   { color: var(--warn);   background: var(--warnBg);   border-color: var(--warnBorder); }
+    .pill-danger { color: var(--danger); background: var(--dangerBg); border-color: var(--dangerBorder); }
+    .pill-info   { color: var(--info);   background: var(--infoBg);   border-color: var(--infoBorder); }
+    .pill-accent { color: var(--accent); background: var(--accentLo); border-color: var(--accentMd); }
+    .pill-muted  { color: var(--fg3); background: transparent; border-color: var(--border2); }
+
+    /* ─── Main grid ──────────────────────────────────────── */
+    .mainGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (min-width: 900px) {
+      .mainGrid { grid-template-columns: 1.1fr .9fr; }
+    }
+
+    /* ─── Cards ──────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadowCard);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    [data-theme="light"] .card { background: #fff; }
+
+    .cardHead {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--card2);
+      flex-shrink: 0;
+    }
+    [data-theme="light"] .cardHead { background: #f8fafd; }
+
+    .cardTitle {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--fg2);
+    }
+    .cardMeta { font-size: 11.5px; color: var(--fg3); }
+
+    .cardBody { padding: 14px; flex: 1; }
+
+    /* ─── Summary panel ──────────────────────────────────── */
+    .summaryStateBar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      border-radius: var(--radiusSm);
+      border: 1px solid var(--border2);
+      background: var(--card2);
+      font-size: 12px;
+    }
+    .summaryStateBar.state-rich     { border-color: var(--okBorder); background: var(--okBg); }
+    .summaryStateBar.state-limited  { border-color: var(--warnBorder); background: var(--warnBg); }
+    .summaryStateBar.state-failed   { border-color: var(--dangerBorder); background: var(--dangerBg); }
+    .summaryStateBar.state-unresolved { border-color: var(--warnBorder); background: var(--warnBg); }
+
+    .kvTable {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 0;
+      font-size: 13px;
+    }
+    .kvRow { display: contents; }
+    .kvKey {
+      color: var(--fg2);
+      font-size: 12px;
+      padding: 6px 10px 6px 0;
+      border-bottom: 1px solid var(--border2);
+      font-weight: 500;
+    }
+    .kvVal {
+      word-break: break-all;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border2);
+      color: var(--fg);
+    }
+    .kvRow:last-child .kvKey,
+    .kvRow:last-child .kvVal { border-bottom: none; }
+
+    .mono { font-family: var(--font-mono); font-size: 12px; }
+
+    /* ─── Output chips ────────────────────────────────────── */
+    .outputList { display: flex; flex-direction: column; gap: 8px; }
+
+    .outputChip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      transition: border-color var(--transition), background var(--transition);
+      position: relative;
+    }
+    .outputChip:hover { background: var(--bg2); }
+    .outputChip.is-recommended {
+      border-color: var(--accentMd);
+      background: var(--accentLo);
+    }
+    .outputChip.is-recommended:hover { background: rgba(255,106,0,.16); }
+    .outputChip.is-disabled {
+      opacity: .55;
+      pointer-events: none;
+    }
+
+    .chipLeft {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .chipTopRow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chipNetDot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .chipName {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .chipSubtext {
+      font-size: 11.5px;
+      color: var(--fg3);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chipBadges { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .chipActions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ─── Strategy badges ─────────────────────────────────── */
+    .badge-rec     { color: var(--accent); background: var(--accentLo); border-color: var(--accentMd); }
+    .badge-preview { color: var(--ok); background: var(--okBg); border-color: var(--okBorder); }
+    .badge-link    { color: var(--fg3); background: transparent; border-color: var(--border2); }
+    .badge-embed   { color: var(--info); background: var(--infoBg); border-color: var(--infoBorder); }
+    .badge-chain   { color: var(--ok); background: var(--okBg); border-color: var(--okBorder); }
+    .badge-unresolved { color: var(--warn); background: var(--warnBg); border-color: var(--warnBorder); }
+
+    /* ─── Network colours applied via class ───────────────── */
+    .net-bitcoin   { background-color: var(--c-bitcoin); }
+    .net-ethereum  { background-color: var(--c-ethereum); }
+    .net-polygon   { background-color: var(--c-polygon); }
+    .net-arbitrum  { background-color: var(--c-arbitrum); }
+    .net-tron      { background-color: var(--c-tron); }
+    .net-solana    { background-color: var(--c-solana); }
+    .net-lightning { background-color: var(--c-lightning); }
+    .net-evm       { background-color: var(--c-evm); }
+
+    /* ─── Viewer ──────────────────────────────────────────── */
+    .viewerWrap {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .viewerBar {
+      padding: 9px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border2);
+      background: var(--card2);
+    }
+    .viewerUrl {
+      color: var(--fg3);
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      word-break: break-all;
+      flex: 1;
+      min-width: 160px;
+    }
+    .viewerBlockedMsg { display: none; } /* legacy — never shown */
+    iframe {
+      width: 100%;
+      height: 520px;
+      border: 0;
+      background: var(--bg);
+      display: block;
+    }
+    .explorerNote {
+      font-size: 11.5px;
+      color: var(--fg3);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    /* ─── Explorer preview fallback card ────────────────── */
+    .previewFallbackCard {
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      min-height: 200px;
+      justify-content: center;
+      background: var(--bg2);
+    }
+    .previewFallbackIcon {
+      font-size: 30px;
+      opacity: .7;
+    }
+    .previewFallbackTitle {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .previewFallbackSub {
+      font-size: 12px;
+      color: var(--fg3);
+      max-width: 340px;
+      line-height: 1.5;
+    }
+    .previewFallbackMeta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      max-width: 420px;
+      font-size: 12px;
+    }
+    .previewFallbackRow {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .previewFallbackKey {
+      color: var(--fg3);
+      min-width: 80px;
+      font-size: 11.5px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .previewFallbackVal {
+      color: var(--fg);
+      word-break: break-all;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .previewFallbackActions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ─── Chip verified badge ────────────────────────────── */
+    .badge-verified { color: var(--ok); background: var(--okBg); border-color: var(--okBorder); }
+    .badge-secondary-chain { color: var(--fg3); background: transparent; border-color: var(--border2); font-size: 10.5px; }
+
+    /* ─── EVM secondary section ──────────────────────────── */
+    .secondaryChainToggle {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--fg3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+    }
+    .secondaryChainToggle:hover { color: var(--fg2); }
+    .secondaryChains { margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .secondaryChains.hidden { display: none; }
+
+    /* ─── Copyable hash in summary ───────────────────────── */
+    .copyableHash {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 1px 4px;
+      transition: background var(--transition);
+    }
+    .copyableHash:hover { background: var(--border2); }
+    .copyableHash .copyIcon { font-size: 10px; color: var(--fg3); opacity: .7; }
+
+    /* ─── Bulk results ───────────────────────────────────── */
+    .bulkTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .bulkTable th {
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--fg3);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      background: var(--card2);
+    }
+    .bulkTable td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border2);
+      vertical-align: middle;
+    }
+    .bulkTable tr:last-child td { border-bottom: none; }
+    .bulkTable tr:hover td { background: var(--bg2); }
+    .bulkInputCell { font-family: var(--font-mono); font-size: 11.5px; word-break: break-all; max-width: 220px; }
+    .bulkActionsCell { text-align: right; white-space: nowrap; }
+    .bulkActionsCell .btn { margin-left: 4px; }
+    .bulkCounter { font-size: 12px; color: var(--fg2); margin-bottom: 10px; }
+
+    /* ─── History ────────────────────────────────────────── */
+    .historySection {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadowCard);
+      overflow: hidden;
+    }
+    .historyHead {
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border2);
+      background: var(--card2);
+    }
+    .historyHeadLeft {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--fg2);
+    }
+    .historyBody { padding: 6px 0; }
+
+    .historyEntry {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border2);
+      transition: background var(--transition);
+    }
+    .historyEntry:last-child { border-bottom: none; }
+    .historyEntry:hover { background: var(--bg2); }
+
+    .historyNetDot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .historyEntryMain { flex: 1; min-width: 0; }
+    .historyEntryLabel {
+      font-size: 12.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--fg);
+    }
+    .historyEntryMeta {
+      font-size: 11px;
+      color: var(--fg3);
+      margin-top: 1px;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .historyEntryTime { font-size: 11px; color: var(--fg3); flex-shrink: 0; }
+    .historyEmpty { padding: 18px 14px; font-size: 12.5px; color: var(--fg3); text-align: center; }
+
+    /* ─── Empty / placeholder states ─────────────────────── */
+    .emptyState {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      color: var(--fg3);
+      font-size: 12.5px;
+      text-align: center;
+      gap: 6px;
+    }
+    .emptyStateIcon { font-size: 28px; margin-bottom: 4px; opacity: .6; }
+    .emptyStateText { color: var(--fg2); font-weight: 500; }
+    .emptyStateSub { color: var(--fg3); font-size: 12px; }
+
+    /* ─── Toast ──────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fg);
+      display: none;
+      z-index: 9999;
+      animation: toastIn .15s ease forwards;
+    }
+    @keyframes toastIn { from { transform: translateX(-50%) translateY(12px); opacity:0; } to { transform: translateX(-50%) translateY(0); opacity:1; } }
+
+    /* ─── Misc ───────────────────────────────────────────── */
+    .shortcutsHint {
+      font-size: 11.5px;
+      color: var(--fg3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .scKey {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .text-ok     { color: var(--ok); }
+    .text-warn   { color: var(--warn); }
+    .text-danger { color: var(--danger); }
+
+    @media (max-width: 640px) {
+      .topRow { flex-direction: column; align-items: flex-start; }
+      .mainGrid { grid-template-columns: 1fr; }
+      .kvTable { grid-template-columns: 110px 1fr; }
+      .btnRow { gap: 6px; }
+      .outputChip { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <!-- ═══ HEADER ═════════════════════════════════════════════ -->
+  <div class="header">
+    <div class="headerInner">
+      <div class="topRow">
+        <div class="brand">
+          <div class="logo">
+            <img src="../assets/logo.png" alt="Triple-A" onerror="this.style.display='none';this.parentElement.textContent='A';" />
+          </div>
+          <div class="titleBlock">
+            <h1>Triple-A Scan</h1>
+            <div class="sub">View your transactions all in one place</div>
+          </div>
+        </div>
+        <div class="headerActions">
+          <button class="btn btn-sm" id="modeBtn">Bulk mode</button>
+          <button class="btn btn-sm" id="themeBtn">⬡ Theme</button>
+          <button class="btn btn-sm btn-primary" id="previewBest">◈ Explorer preview</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INPUT PANEL ════════════════════════════════════════ -->
+  <div class="panel">
+    <div class="panelBody">
+      <div class="inputRow">
+        <div class="inputWrap">
+          <input id="q" placeholder="Paste tx hash, address, explorer URL or LN invoice (lnbc…, 0x…, T…, bc1…)…" />
+        </div>
+        <select id="network">
+          <option value="auto" selected>Auto-detect</option>
+          <option value="bitcoin">Bitcoin</option>
+          <option value="evm">Ethereum, Polygon, or Arbitrum</option>
+          <option value="tron">Tron (TRC-20)</option>
+          <option value="solana">Solana</option>
+          <option value="lightning">Lightning</option>
+        </select>
+      </div>
+
+      <textarea id="bulk" placeholder="Bulk mode — one tx hash / address / URL per line (max 50)"></textarea>
+
+      <div class="btnRow">
+        <button class="btn btn-primary" id="gen" style="min-width:110px;">View transaction</button>
+        <button class="btn" id="copySummary">Copy details</button>
+        <button class="btn" id="copyAll">Copy links</button>
+        <button class="btn" id="openAll">Open all</button>
+        <button class="btn" id="openSameTab">Open details</button>
+        <div style="flex:1;"></div>
+        <div class="shortcutsHint">
+          <span><span class="scKey">Enter</span> View transaction</span>
+          <span><span class="scKey">⌘ Enter</span> Preview</span>
+          <span><span class="scKey">⌘⇧C</span> Copy details</span>
+        </div>
+      </div>
+
+      <div class="statusRow">
+        <div id="classificationBadges" class="classificationBadges"></div>
+        <div id="agentHint" class="agentHint"></div>
+      </div>
+
+      <!-- ═══ MAIN GRID ═════════════════════════════════════ -->
+      <div class="mainGrid" id="mainGrid">
+
+        <!-- Summary card -->
+        <div class="card" id="summaryCard">
+          <div class="cardHead">
+            <span class="cardTitle">One-page summary</span>
+            <span class="cardMeta" id="summaryMeta"></span>
+          </div>
+          <div class="cardBody" id="summaryBody">
+            <div class="emptyState">
+              <div class="emptyStateIcon">⬡</div>
+              <div class="emptyStateText">No lookup yet</div>
+              <div class="emptyStateSub">Paste a value above and click View transaction</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Links / Viewer card -->
+        <div class="card" id="linksCard">
+          <div class="cardHead">
+            <span class="cardTitle">Explorer links</span>
+            <span class="cardMeta" id="linksCardMeta">Click a result to open Explorer preview</span>
+          </div>
+          <div class="cardBody">
+            <div id="outputList" class="outputList"></div>
+
+            <div class="viewerWrap" id="viewerWrap" style="display:none;">
+              <div class="viewerBar">
+                <span class="pill pill-info" style="flex-shrink:0;" id="viewerBadge">◈ Explorer Preview</span>
+                <div class="viewerUrl" id="viewerUrl"></div>
+                <button class="btn btn-sm" id="openNewTab">↗ Open explorer</button>
+                <button class="btn btn-sm" id="copyUrl">Copy URL</button>
+                <button class="btn btn-sm" id="clearPreview">✕</button>
+              </div>
+              <div class="viewerBlockedMsg" id="blockedMsg"></div>
+              <iframe id="viewer" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+
+            <div id="outputListEmpty" class="emptyState" style="display:none;">
+              <div class="emptyStateIcon">🔗</div>
+              <div class="emptyStateText">No links yet</div>
+              <div class="emptyStateSub">Run a lookup to see explorer links</div>
+            </div>
+
+            <div class="explorerNote" id="explorerNote" style="display:none;">
+              Previews use available network data and verified explorer links for deeper review.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /mainGrid -->
+
+      <!-- Bulk results (replaces mainGrid in bulk mode) -->
+      <div id="bulkResults" style="display:none; margin-top:14px;"></div>
+
+    </div><!-- /panelBody -->
+  </div><!-- /panel -->
+
+  <!-- ═══ HISTORY ══════════════════════════════════════════ -->
+  <div class="historySection">
+    <div class="historyHead">
+      <div class="historyHeadLeft">⏱ History <span style="font-weight:400;opacity:.6;text-transform:none;letter-spacing:0;">(local)</span></div>
+      <button class="btn btn-sm" id="clearHistory">Clear</button>
+    </div>
+    <div class="historyBody" id="historyBody">
+      <div class="historyEmpty">No history yet</div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   TRIPLE-A SUPPORT LOOKUP — v2.0
+   Architecture: typed OutputItem model, capability registry,
+   strategy dispatch, EVM resolution at generation time,
+   structured onePage with summaryState discriminant.
+   ═══════════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+
+/* ─── OUTPUT TYPE REGISTRY ──────────────────────────────────────
+   Single source of truth. Replaces EXPLORERS object and
+   IFRAME_BLOCKED_HOSTS array entirely.
+   previewStrategy: NATIVE_IFRAME | SRCDOC_LIVE | SRCDOC_STATIC | OPEN_ONLY
+   ─────────────────────────────────────────────────────────────── */
+const REG = {
+  tron_tx: {
+    label:"Tron Transaction", shortLabel:"Tronscan",
+    network:"Tron", chainId:"tron", entityType:"tx",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_STATIC", priority:1, enabled:true,
+    buildUrl: id => `https://tronscan.org/#/transaction/${id}`,
+    apiUrl:   id => `https://apilist.tronscanapi.com/api/transaction-info?hash=${id}`,
+  },
+  tron_address: {
+    label:"Tron Address", shortLabel:"Tronscan",
+    network:"Tron", chainId:"tron", entityType:"address",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:1, enabled:true,
+    buildUrl: id => `https://tronscan.org/#/address/${id}`,
+  },
+  ethereum_tx: {
+    label:"Ethereum", shortLabel:"Etherscan",
+    network:"Ethereum", chainId:"ethereum", entityType:"tx",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_LIVE", priority:2, enabled:true,
+    buildUrl: id => `https://etherscan.io/tx/${id}`,
+    rpc: "https://eth.llamarpc.com", symbol:"ETH",
+  },
+  polygon_tx: {
+    label:"Polygon", shortLabel:"Polygonscan",
+    network:"Polygon", chainId:"polygon", entityType:"tx",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_LIVE", priority:3, enabled:true,
+    buildUrl: id => `https://polygonscan.com/tx/${id}`,
+    rpc: "https://polygon-rpc.com", symbol:"POL",
+  },
+  arbitrum_tx: {
+    label:"Arbitrum", shortLabel:"Arbiscan",
+    network:"Arbitrum", chainId:"arbitrum", entityType:"tx",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_LIVE", priority:4, enabled:true,
+    buildUrl: id => `https://arbiscan.io/tx/${id}`,
+    rpc: "https://arb1.llamarpc.com", symbol:"ETH",
+  },
+  ethereum_address: {
+    label:"Ethereum", shortLabel:"Etherscan",
+    network:"Ethereum", chainId:"ethereum", entityType:"address",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_LIVE", priority:2, enabled:true,
+    buildUrl: id => `https://etherscan.io/address/${id}`,
+    rpc: "https://eth.llamarpc.com", symbol:"ETH",
+  },
+  polygon_address: {
+    label:"Polygon", shortLabel:"Polygonscan",
+    network:"Polygon", chainId:"polygon", entityType:"address",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_LIVE", priority:3, enabled:true,
+    buildUrl: id => `https://polygonscan.com/address/${id}`,
+    rpc: "https://polygon-rpc.com", symbol:"POL",
+  },
+  arbitrum_address: {
+    label:"Arbitrum", shortLabel:"Arbiscan",
+    network:"Arbitrum", chainId:"arbitrum", entityType:"address",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_LIVE", priority:4, enabled:true,
+    buildUrl: id => `https://arbiscan.io/address/${id}`,
+    rpc: "https://arb1.llamarpc.com", symbol:"ETH",
+  },
+  bitcoin_tx: {
+    label:"Bitcoin", shortLabel:"mempool.space",
+    network:"Bitcoin", chainId:"bitcoin", entityType:"tx",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_STATIC", priority:1, enabled:true,
+    buildUrl: id => `https://mempool.space/tx/${id}`,
+    apiUrl:   id => `https://mempool.space/api/tx/${id}`,
+  },
+  bitcoin_address: {
+    label:"Bitcoin Address", shortLabel:"mempool.space",
+    network:"Bitcoin", chainId:"bitcoin", entityType:"address",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_STATIC", priority:1, enabled:true,
+    buildUrl: id => `https://mempool.space/address/${id}`,
+  },
+  solana_tx: {
+    label:"Solana", shortLabel:"Solscan",
+    network:"Solana", chainId:"solana", entityType:"tx",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_STATIC", priority:1, enabled:true,
+    buildUrl: id => `https://solscan.io/tx/${id}`,
+  },
+  solana_address: {
+    label:"Solana Account", shortLabel:"Solscan",
+    network:"Solana", chainId:"solana", entityType:"address",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_STATIC", priority:1, enabled:true,
+    buildUrl: id => `https://solscan.io/account/${id}`,
+  },
+  solana_tx_explorer: {
+    label:"Solana Explorer", shortLabel:"Explorer",
+    network:"Solana", chainId:"solana", entityType:"tx",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:10, enabled:true,
+    buildUrl: id => `https://explorer.solana.com/tx/${id}`,
+  },
+  solana_address_explorer: {
+    label:"Solana Explorer", shortLabel:"Explorer",
+    network:"Solana", chainId:"solana", entityType:"address",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:10, enabled:true,
+    buildUrl: id => `https://explorer.solana.com/address/${id}`,
+  },
+  lightning_invoice: {
+    label:"Lightning Invoice", shortLabel:"Decoder",
+    network:"Lightning", chainId:"lightning", entityType:"invoice",
+    supportsEmbed:false, supportsPreview:true, supportsOpenInNewTab:true,
+    previewStrategy:"SRCDOC_STATIC", priority:1, enabled:true,
+    buildUrl: id => `https://lightningdecoder.com/?invoice=${encodeURIComponent(id)}`,
+  },
+  search_etherscan: {
+    label:"Etherscan Search", shortLabel:"Etherscan",
+    network:"Ethereum, Polygon, or Arbitrum", chainId:"ethereum", entityType:"search",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:20, enabled:true,
+    buildUrl: q => `https://etherscan.io/search?f=0&q=${encodeURIComponent(q)}`,
+  },
+  search_tronscan: {
+    label:"Tronscan Search", shortLabel:"Tronscan",
+    network:"Tron", chainId:"tron", entityType:"search",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:21, enabled:true,
+    buildUrl: q => `https://tronscan.org/#/search/${encodeURIComponent(q)}`,
+  },
+  search_mempool: {
+    label:"mempool.space Search", shortLabel:"mempool",
+    network:"Bitcoin", chainId:"bitcoin", entityType:"search",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:22, enabled:true,
+    buildUrl: q => `https://mempool.space/search?q=${encodeURIComponent(q)}`,
+  },
+  search_solscan: {
+    label:"Solscan Search", shortLabel:"Solscan",
+    network:"Solana", chainId:"solana", entityType:"search",
+    supportsEmbed:false, supportsPreview:false, supportsOpenInNewTab:true,
+    previewStrategy:"OPEN_ONLY", priority:23, enabled:true,
+    buildUrl: q => `https://solscan.io/search?q=${encodeURIComponent(q)}`,
+  },
+};
+
+// EVM chains ordered for sequential TX probe
+const EVM_TX_TYPEIDS  = ["ethereum_tx",  "polygon_tx",  "arbitrum_tx"];
+const EVM_ADDR_TYPEIDS = ["ethereum_address","polygon_address","arbitrum_address"];
+
+// Public RPC fallbacks used only for read-only lookups.
+// Kept client-side for this review build; for production, Triple-A can proxy these internally.
+const EVM_RPC_FALLBACKS = {
+  ethereum_tx: [
+    "https://eth.llamarpc.com",
+    "https://ethereum-rpc.publicnode.com",
+    "https://rpc.flashbots.net",
+    "https://cloudflare-eth.com"
+  ],
+  polygon_tx: [
+    "https://polygon-rpc.com",
+    "https://polygon.llamarpc.com",
+    "https://polygon-bor-rpc.publicnode.com"
+  ],
+  arbitrum_tx: [
+    "https://arb1.llamarpc.com",
+    "https://arbitrum.llamarpc.com",
+    "https://arbitrum-one-rpc.publicnode.com",
+    "https://arb1.arbitrum.io/rpc"
+  ],
+  ethereum_address: [
+    "https://eth.llamarpc.com",
+    "https://ethereum-rpc.publicnode.com",
+    "https://rpc.flashbots.net",
+    "https://cloudflare-eth.com"
+  ],
+  polygon_address: [
+    "https://polygon-rpc.com",
+    "https://polygon.llamarpc.com",
+    "https://polygon-bor-rpc.publicnode.com"
+  ],
+  arbitrum_address: [
+    "https://arb1.llamarpc.com",
+    "https://arbitrum.llamarpc.com",
+    "https://arbitrum-one-rpc.publicnode.com",
+    "https://arb1.arbitrum.io/rpc"
+  ],
+};
+
+/* ─── FACTORY ────────────────────────────────────────────────── */
+function buildOutputItem(typeId, rawId, opts = {}) {
+  const r = REG[typeId];
+  if (!r || !r.enabled) return null;
+  return {
+    typeId, rawId,
+    label:     r.label,
+    shortLabel: r.shortLabel,
+    url:       r.buildUrl(rawId),
+    network:   r.network,
+    chainId:   r.chainId,
+    entityType: r.entityType,
+    supportsEmbed:       r.supportsEmbed,
+    supportsPreview:     r.supportsPreview,
+    supportsOpenInNewTab: r.supportsOpenInNewTab,
+    // If summaryData is present, override strategy to SRCDOC_STATIC (instant, no fetch)
+    previewStrategy: opts.summaryData ? "SRCDOC_STATIC" : r.previewStrategy,
+    priority:      r.priority,
+    isRecommended: opts.isRecommended ?? false,
+    isSecondary:   opts.isSecondary   ?? false,
+    resolvedChain: opts.resolvedChain ?? null,
+    summaryData:   opts.summaryData   ?? null,
+    reasonDisabled: opts.reasonDisabled ?? null,
+  };
+}
+
+/* ─── UTILS ──────────────────────────────────────────────────── */
+function esc(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+
+function nowStamp(){ return new Date().toISOString().replace("T"," ").slice(0,19)+" UTC"; }
+function fmtUnix(s){ if(!s) return ""; return new Date(s*1000).toISOString().replace("T"," ").slice(0,19)+" UTC"; }
+function fmtMs(ms){ if(!ms) return ""; return new Date(ms).toISOString().replace("T"," ").slice(0,19)+" UTC"; }
+function satToBtc(s){ return (s/1e8).toFixed(8); }
+
+let _toastTimer;
+function toast(msg){
+  const el = $("toast");
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.style.display = "none", 1400);
+}
+
+function netDotClass(chainId){
+  const map = {bitcoin:"net-bitcoin",ethereum:"net-ethereum",polygon:"net-polygon",arbitrum:"net-arbitrum",tron:"net-tron",solana:"net-solana",lightning:"net-lightning",evm:"net-evm"};
+  return map[chainId] || "net-evm";
+}
+
+/* ─── INPUT NORMALISATION ────────────────────────────────────── */
+function normalizeInput(raw){
+  let x = (raw||"").trim();
+  if (!x) return { value:"", hintNetwork:null };
+  if (x.toLowerCase().startsWith("lightning:")) x = x.slice(10);
+  try{
+    if (x.startsWith("http://") || x.startsWith("https://")){
+      const u = new URL(x);
+      const h = (u.hostname||"").toLowerCase();
+      if (h.includes("tronscan.org")){
+        const hash = (u.hash||"");
+        const mTx   = hash.match(/transaction\/([0-9a-f]+)/i) || u.pathname.match(/transaction\/([0-9a-f]+)/i);
+        const mAddr = hash.match(/address\/([0-9a-z]+)/i)     || u.pathname.match(/address\/([0-9a-z]+)/i);
+        if (mTx)   return {value:mTx[1],   hintNetwork:"tron"};
+        if (mAddr) return {value:mAddr[1], hintNetwork:"tron"};
+      }
+      if (h.includes("etherscan.io")||h.includes("polygonscan.com")||h.includes("arbiscan.io")){
+        const mTx   = u.pathname.match(/\/tx\/([0-9a-fx]+)/i);
+        const mAddr = u.pathname.match(/\/address\/([0-9a-fx]+)/i);
+        if (mTx)   return {value:mTx[1],   hintNetwork:"evm"};
+        if (mAddr) return {value:mAddr[1], hintNetwork:"evm"};
+      }
+      if (h.includes("mempool.space")){
+        const mTx   = u.pathname.match(/\/tx\/([0-9a-f]+)/i);
+        const mAddr = u.pathname.match(/\/address\/([0-9a-z]+)/i);
+        if (mTx)   return {value:mTx[1],   hintNetwork:"bitcoin"};
+        if (mAddr) return {value:mAddr[1], hintNetwork:"bitcoin"};
+      }
+      if (h.includes("solscan.io")){
+        const mTx  = u.pathname.match(/\/tx\/([0-9a-z]+)/i);
+        const mAcc = u.pathname.match(/\/account\/([0-9a-z]+)/i);
+        if (mTx)  return {value:mTx[1],  hintNetwork:"solana"};
+        if (mAcc) return {value:mAcc[1], hintNetwork:"solana"};
+      }
+      if (h.includes("explorer.solana.com")){
+        const mTx  = u.pathname.match(/\/tx\/([0-9a-z]+)/i);
+        const mAcc = u.pathname.match(/\/address\/([0-9a-z]+)/i);
+        if (mTx)  return {value:mTx[1],  hintNetwork:"solana"};
+        if (mAcc) return {value:mAcc[1], hintNetwork:"solana"};
+      }
+      if (h.includes("lightningdecoder.com")){
+        const inv = u.searchParams.get("invoice");
+        if (inv) return {value:inv, hintNetwork:"lightning"};
+      }
+    }
+  } catch(e){}
+  return {value: x.replace(/\s+/g,""), hintNetwork:null};
+}
+
+const reHex64   = /^[a-fA-F0-9]{64}$/;
+const reHexTx0x = /^0x[a-fA-F0-9]{64}$/;
+const reEvmAddr = /^0x[a-fA-F0-9]{40}$/;
+const reTronAddr = /^T[1-9A-HJ-NP-Za-km-z]{33}$/;
+const reLnInvoice = /^ln(bc|tb|bcrt)[0-9a-z]+$/i;
+const reBase58  = /^[1-9A-HJ-NP-Za-km-z]+$/;
+const reBtcAddr = /^(bc1)[0-9ac-hj-np-z]{11,71}$|^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+
+function looksLikeSolana(x){ return reBase58.test(x) && x.length >= 43 && x.length <= 88; }
+
+function classify(x){
+  if (!x) return {network:"empty",kind:"empty"};
+  if (reLnInvoice.test(x)) return {network:"lightning",kind:"invoice"};
+  if (reHexTx0x.test(x))  return {network:"evm",kind:"tx"};
+  if (reEvmAddr.test(x))  return {network:"evm",kind:"address"};
+  if (reTronAddr.test(x)) return {network:"tron",kind:"address"};
+  if (looksLikeSolana(x)) return {network:"solana",kind:"tx_or_address"};
+  if (reBtcAddr.test(x))  return {network:"bitcoin",kind:"address"};
+  if (reHex64.test(x))    return {network:"hex64",kind:"tx"};
+  return {network:"unknown",kind:"unknown"};
+}
+
+/* ─── RPC / FETCH HELPERS ───────────────────────────────────── */
+async function tryFetchJson(url, opts){
+  try{
+    const res = await fetch(url, opts||{method:"GET"});
+    if (!res.ok) return {ok:false, status:res.status, data:null};
+    return {ok:true, status:res.status, data: await res.json()};
+  } catch(e){ return {ok:false, status:0, data:null, error:String(e)}; }
+}
+
+async function evmRpc(rpcUrl, method, params, timeoutMs=4500){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try{
+    const res = await fetch(rpcUrl,{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify({jsonrpc:"2.0",id:1,method,params}),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const d = await res.json();
+    return (d.error||d.result===undefined)?null:d.result;
+  } catch{
+    clearTimeout(timer);
+    return null;
+  }
+}
+
+// Try every configured RPC endpoint for a chain until one returns a usable response.
+// Returns both the result and the endpoint that worked so follow-up calls stay on the same chain.
+async function evmRpcFirst(typeId, method, params){
+  const endpoints = EVM_RPC_FALLBACKS[typeId] || (REG[typeId]?.rpc ? [REG[typeId].rpc] : []);
+  for (const rpcUrl of endpoints){
+    const result = await evmRpc(rpcUrl, method, params);
+    if (result !== null && result !== undefined) return {result, rpcUrl};
+  }
+  return {result:null, rpcUrl:null};
+}
+
+function hexDec(h){ try{ return h!=null?parseInt(h,16):null; } catch{ return null; } }
+
+function weiToNative(weiVal, symbol, decimals=18){
+  try{
+    const wei = typeof weiVal==="bigint"?weiVal:BigInt(weiVal);
+    if (wei===0n) return `0 ${symbol}`;
+    const f = BigInt(10)**BigInt(decimals);
+    const whole = (wei/f).toString();
+    const frac  = (wei%f).toString().padStart(decimals,"0").replace(/0+$/,"").slice(0,8);
+    return frac?`${whole}.${frac} ${symbol}`:`${whole} ${symbol}`;
+  } catch{ return "Not available"; }
+}
+
+/* ─── EVM CHAIN PROBE (runs at generation time) ─────────────── */
+// Sequential: stops at first chain that confirms the TX. Avoids re-probing at render time.
+async function probeEvmTx(hash){
+  for (const typeId of EVM_TX_TYPEIDS){
+    const r = REG[typeId];
+
+    // 1) First confirm the hash exists on this specific chain.
+    const txResp = await evmRpcFirst(typeId, "eth_getTransactionByHash", [hash]);
+    const tx = txResp.result;
+    if (!tx?.hash) continue;
+
+    // 2) Once found, enrich from the same chain.
+    const [receiptResp, latestBlockResp] = await Promise.all([
+      evmRpcFirst(typeId, "eth_getTransactionReceipt", [hash]),
+      evmRpcFirst(typeId, "eth_blockNumber", [])
+    ]);
+
+    const receipt = receiptResp.result;
+    const latestBlockHex = latestBlockResp.result;
+    const block = hexDec(tx.blockNumber);
+    const latestBlock = hexDec(latestBlockHex);
+    const confirmations = (block!=null && latestBlock!=null && latestBlock >= block) ? (latestBlock - block + 1) : null;
+    const status = receipt ? (receipt.status === "0x1" ? "Confirmed" : "Failed") : "Pending";
+
+    let fee = "Not available";
+    try {
+      if (receipt?.effectiveGasPrice && receipt?.gasUsed) fee = weiToNative(BigInt(receipt.effectiveGasPrice) * BigInt(receipt.gasUsed), r.symbol);
+      else if (tx.gasPrice && receipt?.gasUsed) fee = weiToNative(BigInt(tx.gasPrice) * BigInt(receipt.gasUsed), r.symbol);
+    } catch {}
+
+    const blockDataResp = block!=null ? await evmRpc(txResp.rpcUrl, "eth_getBlockByNumber", [tx.blockNumber, false]) : null;
+    const timestamp = blockDataResp?.timestamp ? fmtUnix(hexDec(blockDataResp.timestamp)) : "";
+    const gasPrice = tx.gasPrice ? weiToNative(tx.gasPrice, r.symbol) : "";
+    const maxFeePerGas = tx.maxFeePerGas ? weiToNative(tx.maxFeePerGas, r.symbol) : "";
+    const maxPriorityFeePerGas = tx.maxPriorityFeePerGas ? weiToNative(tx.maxPriorityFeePerGas, r.symbol) : "";
+    const gasLimit = hexDec(tx.gas);
+    const gasUsed = hexDec(receipt?.gasUsed);
+    const txType = tx.type != null ? String(hexDec(tx.type)) : "";
+    const nonce = tx.nonce != null ? hexDec(tx.nonce) : null;
+    const inputData = tx.input || "";
+    const methodId = inputData && inputData !== "0x" ? inputData.slice(0,10) : "";
+
+    return {
+      typeId, chainId:r.chainId, chainLabel:r.network, symbol:r.symbol,
+      txHash:tx.hash, block, status, timestamp, confirmations,
+      from:tx.from||"", to:tx.to||"",
+      value: weiToNative(tx.value||"0x0",r.symbol),
+      fee, gasUsed, gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas,
+      nonce, txType, methodId, inputData,
+      rpcUsed: txResp.rpcUrl,
+    };
+  }
+  return null;
+}
+
+// Parallel probe for addresses (all chains simultaneously)
+async function probeEvmAddress(address){
+  return Promise.all(EVM_ADDR_TYPEIDS.map(async typeId => {
+    const r = REG[typeId];
+    const [balanceResp, nonceResp] = await Promise.all([
+      evmRpcFirst(typeId, "eth_getBalance",          [address,"latest"]),
+      evmRpcFirst(typeId, "eth_getTransactionCount", [address,"latest"])
+    ]);
+    const balance = balanceResp.result;
+    const nonce = nonceResp.result;
+    return {
+      typeId, chainId:r.chainId, chainLabel:r.network, symbol:r.symbol,
+      balance: balance!=null?weiToNative(balance,r.symbol):"—",
+      txCount: nonce!=null?hexDec(nonce):"—",
+    };
+  }));
+}
+
+// For hex64 ambiguous inputs (no 0x prefix): Tron vs BTC detection
+async function detectHex64Network(hash){
+  const tron = await tryFetchJson(REG.tron_tx.apiUrl(hash));
+  const tronOk = tron.ok&&tron.data&&(
+    (typeof tron.data.hash==="string"&&tron.data.hash.length===64)||
+    tron.data.confirmed===true||Array.isArray(tron.data.contractRet)
+  );
+  if (tronOk) return "tron";
+  const btc = await tryFetchJson(REG.bitcoin_tx.apiUrl(hash));
+  if (btc.ok&&btc.data&&typeof btc.data.txid==="string") return "bitcoin";
+  return "tron";
+}
+
+/* ─── SUMMARY BUILDERS (return typed onePage) ──────────────── */
+// summaryState: RICH | LIMITED | FETCH_FAILED | CHAIN_UNRESOLVED | UNSUPPORTED | EMPTY
+
+function makeOnePage(overrides){
+  return {
+    summaryState:"EMPTY", network:"", chainId:"", resolvedChain:null,
+    entityType:"tx", rawId:"", fields:[], explorerBest:null,
+    fetchedAt:null, agentNote:null, fetchError:null,
+    ...overrides,
+  };
+}
+
+function field(key,value,valueType="text"){ return {key,value:String(value??""),valueType}; }
+
+async function buildTronTxOnePage(hash){
+  const r = await tryFetchJson(REG.tron_tx.apiUrl(hash));
+  if (!r.ok) return makeOnePage({summaryState:"FETCH_FAILED",network:"Tron",chainId:"tron",resolvedChain:"tron",entityType:"tx",rawId:hash,fetchError:`Transaction details are temporarily unavailable (${r.status||"network error"})`,explorerBest:REG.tron_tx.buildUrl(hash)});
+  const tx = r.data||{};
+  const confirmed = tx.confirmed===true||tx.is_confirmed===true;
+  const tsMs = tx.timestamp||tx.block_timestamp||tx.date_created||null;
+  const block = tx.block||tx.blockNumber||tx.block_num||"";
+  const contractType = tx.contractType||tx.contract_type||tx.type||"";
+  const from = tx.ownerAddress||tx.owner_address||tx.fromAddress||tx.from||"";
+  const to   = tx.toAddress||tx.to_address||tx.to||"";
+
+  /* ── Amount extraction (TRX native + TRC-20 tokens) ── */
+  let amountStr = "";
+  try {
+    // TRC-20 token transfer info (highest confidence for USDT, USDC, etc.)
+    const trc20 = Array.isArray(tx.trc20TransferInfo) ? tx.trc20TransferInfo[0] : null;
+    if (trc20) {
+      const sym = (trc20.symbol||trc20.tokenAbbr||"").toUpperCase();
+      const dec = parseInt(trc20.decimals||trc20.tokenDecimal||6, 10);
+      const rawAmt = trc20.amount_str || trc20.amount;
+      if (rawAmt) {
+        const val = Number(rawAmt) / Math.pow(10, dec);
+        if (val > 0 && sym) amountStr = `${val.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:dec})} ${sym}`;
+      }
+    }
+    // Token transfer via tokenInfo (older API shape)
+    if (!amountStr) {
+      const ti = tx.tokenInfo || null;
+      const rawAmt = tx.amount ?? tx.contractData?.amount ?? tx.contractData?.call_value ?? null;
+      if (rawAmt != null && Number(rawAmt) !== 0) {
+        const sym = ti?.tokenAbbr ? ti.tokenAbbr.toUpperCase() : "";
+        const isTrx = !sym || sym === "TRX" || sym === "_";
+        if (isTrx) {
+          const val = Number(rawAmt) / 1e6;
+          if (val > 0) amountStr = `${val.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:6})} TRX`;
+        } else {
+          const dec = parseInt(ti?.tokenDecimal ?? 6, 10);
+          const val = Number(rawAmt) / Math.pow(10, dec);
+          if (val > 0) amountStr = `${val.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:dec})} ${sym}`;
+        }
+      }
+    }
+    // Fallback: TRX native value field
+    if (!amountStr) {
+      const nativeVal = tx.contractData?.amount || tx.contractData?.call_value;
+      if (nativeVal && Number(nativeVal) > 0) {
+        const val = Number(nativeVal) / 1e6;
+        amountStr = `${val.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:6})} TRX`;
+      }
+    }
+  } catch(e){}
+
+  const fields = [
+    field("Status",    confirmed?"Confirmed":"Pending","status"),
+    field("Block",     String(block),"text"),
+    field("Timestamp", tsMs?fmtMs(tsMs):"","timestamp"),
+    field("Contract",  contractType,"text"),
+    amountStr ? field("Amount", amountStr, "amount") : null,
+    field("From",      from,"address"),
+    field("To",        to,"address"),
+    field("TX Hash",   hash,"hash"),
+  ].filter(f=>f&&f.value!=="");
+  return makeOnePage({summaryState:"RICH",network:"Tron",chainId:"tron",resolvedChain:"tron",entityType:"tx",rawId:hash,fields,explorerBest:REG.tron_tx.buildUrl(hash),fetchedAt:new Date().toISOString()});
+}
+
+async function buildBitcoinTxOnePage(txid){
+  const r = await tryFetchJson(REG.bitcoin_tx.apiUrl(txid));
+  if (!r.ok) return makeOnePage({summaryState:"FETCH_FAILED",network:"Bitcoin",chainId:"bitcoin",resolvedChain:"bitcoin",entityType:"tx",rawId:txid,fetchError:`Transaction details are temporarily unavailable (${r.status||"network"})`,explorerBest:REG.bitcoin_tx.buildUrl(txid)});
+  const tx = r.data;
+  const confirmed = !!tx?.status?.confirmed;
+  const blockHeight = tx?.status?.block_height||"";
+  const blockTime   = tx?.status?.block_time?fmtUnix(tx.status.block_time):"";
+  const feeSats = typeof tx?.fee==="number"?tx.fee:null;
+  let outSats=0;
+  if (Array.isArray(tx?.vout)) for(const o of tx.vout) if(typeof o?.value==="number") outSats+=o.value;
+  const fields = [
+    field("Status",       confirmed?"Confirmed":"Unconfirmed","status"),
+    field("Block",        String(blockHeight),"text"),
+    field("Timestamp",    blockTime,"timestamp"),
+    field("Fee",          feeSats!=null?`${feeSats} sats (${satToBtc(feeSats)} BTC)`:"","amount"),
+    field("Outputs total",`${outSats} sats (${satToBtc(outSats)} BTC)`,"amount"),
+    field("Inputs",       String(Array.isArray(tx?.vin)?tx.vin.length:""),"text"),
+    field("Outputs",      String(Array.isArray(tx?.vout)?tx.vout.length:""),"text"),
+    field("TX ID",        txid,"hash"),
+  ].filter(f=>f.value!=="");
+  return makeOnePage({summaryState:"RICH",network:"Bitcoin",chainId:"bitcoin",resolvedChain:"bitcoin",entityType:"tx",rawId:txid,fields,explorerBest:REG.bitcoin_tx.buildUrl(txid),fetchedAt:new Date().toISOString()});
+}
+
+async function buildSolanaOnePage(sigOrAddr){
+  const solscanUrl = REG.solana_tx.buildUrl(sigOrAddr);
+
+  try {
+    const proxyUrl = `/.netlify/functions/solana-transaction?signature=${encodeURIComponent(sigOrAddr)}`;
+    const proxied = await tryFetchJson(proxyUrl);
+
+    if (proxied.ok && proxied.data && proxied.data.found) {
+      const d = proxied.data;
+      const fields = [
+        field("Network", "Solana", "text"),
+        field("Status", d.status || "Confirmed", "status"),
+        field("Type", d.type || "Transaction", "text"),
+        d.amount ? field("Amount", d.amount, "amount") : null,
+        d.fee ? field("Fee", d.fee, "amount") : null,
+        d.timestamp ? field("Timestamp", d.timestamp, "timestamp") : null,
+        d.source ? field("Source", d.source, "address") : null,
+        d.destination ? field("Destination", d.destination, "address") : null,
+        d.description ? field("Description", d.description, "text") : null,
+        field("Signature", sigOrAddr, "hash"),
+      ].filter(Boolean).filter(f => f.value !== "");
+
+      return makeOnePage({
+        summaryState:"RICH",
+        network:"Solana",
+        chainId:"solana",
+        resolvedChain:"solana",
+        entityType:"tx",
+        rawId:sigOrAddr,
+        fields,
+        explorerBest:d.explorerUrl || solscanUrl,
+        fetchedAt:new Date().toISOString(),
+        agentNote:"Solana transaction summary loaded through the backend Helius indexer proxy."
+      });
+    }
+  } catch(e) {}
+
+  const rpc = "https://api.mainnet-beta.solana.com";
+
+  const txReq = {
+    jsonrpc:"2.0",
+    id:1,
+    method:"getTransaction",
+    params:[sigOrAddr,{encoding:"jsonParsed",maxSupportedTransactionVersion:0}]
+  };
+
+  const r = await tryFetchJson(rpc,{
+    method:"POST",
+    headers:{"content-type":"application/json"},
+    body:JSON.stringify(txReq)
+  });
+
+  if (r.ok && r.data?.result){
+    const tx = r.data.result;
+    const err = tx?.meta?.err;
+    const feeLam = tx?.meta?.fee ?? null;
+    const feeSol = typeof feeLam==="number" ? (feeLam/1e9).toFixed(9) : "";
+    const accountKeys = Array.isArray(tx?.transaction?.message?.accountKeys) ? tx.transaction.message.accountKeys : [];
+    const feePayer = accountKeys[0]?.pubkey || accountKeys[0] || "";
+
+    const fields = [
+      field("Network", "Solana", "text"),
+      field("Status", err ? "Failed" : "Confirmed", "status"),
+      field("Slot", String(tx?.slot ?? ""), "text"),
+      field("Timestamp", tx?.blockTime ? fmtUnix(tx.blockTime) : "", "timestamp"),
+      field("Fee", typeof feeLam==="number" ? `${feeLam} lamports (${feeSol} SOL)` : "", "amount"),
+      field("Fee payer", feePayer, "address"),
+      field("Accounts", String(accountKeys.length || ""), "text"),
+      field("Signature", sigOrAddr, "hash"),
+    ].filter(f => f && f.value !== "");
+
+    return makeOnePage({
+      summaryState:"RICH",
+      network:"Solana",
+      chainId:"solana",
+      resolvedChain:"solana",
+      entityType:"tx",
+      rawId:sigOrAddr,
+      fields,
+      explorerBest:solscanUrl,
+      fetchedAt:new Date().toISOString(),
+      agentNote:"Solana transaction details loaded from public RPC."
+    });
+  }
+
+  const statusReq = {
+    jsonrpc:"2.0",
+    id:1,
+    method:"getSignatureStatuses",
+    params:[[sigOrAddr],{searchTransactionHistory:true}]
+  };
+
+  const s = await tryFetchJson(rpc,{
+    method:"POST",
+    headers:{"content-type":"application/json"},
+    body:JSON.stringify(statusReq)
+  });
+
+  const status = s?.data?.result?.value?.[0] || null;
+  if (status){
+    const confirmationStatus = status.confirmationStatus || (status.err ? "failed" : "confirmed");
+    const fields = [
+      field("Network","Solana","text"),
+      field("Type","Solana transaction signature","text"),
+      field("Status", status.err ? "Failed" : confirmationStatus.charAt(0).toUpperCase()+confirmationStatus.slice(1), "status"),
+      field("Slot", String(status.slot ?? ""), "text"),
+      field("Confirmations", status.confirmations == null ? "Finalized" : String(status.confirmations), "text"),
+      field("Signature", sigOrAddr, "hash"),
+    ];
+
+    return makeOnePage({
+      summaryState:"LIMITED",
+      network:"Solana",
+      chainId:"solana",
+      resolvedChain:"solana",
+      entityType:"tx",
+      rawId:sigOrAddr,
+      fields,
+      explorerBest:solscanUrl,
+      fetchedAt:new Date().toISOString(),
+      agentNote:"Signature found, but full transaction details were not returned by public RPC."
+    });
+  }
+
+  const fields = [
+    field("Network","Solana","text"),
+    field("Type","Solana signature or account","text"),
+    field("Status","Backend/indexer data unavailable","status"),
+    field("Format","Valid Solana-format value","text"),
+    field("Note","The Solana backend indexer proxy did not return parsed data. Confirm the Netlify Function is deployed and HELIUS_API_KEY is configured, then redeploy the site.","text"),
+    field("Input",sigOrAddr,"hash"),
+  ];
+
+  return makeOnePage({
+    summaryState:"LIMITED",
+    network:"Solana",
+    chainId:"solana",
+    resolvedChain:"solana",
+    entityType:"tx",
+    rawId:sigOrAddr,
+    fields,
+    explorerBest:solscanUrl,
+    fetchedAt:new Date().toISOString(),
+    agentNote:"Solana backend/indexer verification required."
+  });
+}
+
+function buildLightningOnePage(invoice){
+  const decoded = decodeLightningInvoiceBasic(invoice) || {};
+  const fields = [
+    field("Type","Lightning Invoice","text"),
+    field("Status","Invoice format detected","status"),
+    decoded.network ? field("Network",decoded.network,"text") : null,
+    decoded.amountText ? field("Amount",decoded.amountText,"amount") : null,
+    decoded.createdAt ? field("Created at",decoded.createdAt,"timestamp") : null,
+    decoded.expiry ? field("Expiry",decoded.expiry,"text") : null,
+    decoded.paymentHash ? field("Payment hash",decoded.paymentHash,"hash") : null,
+    decoded.description ? field("Description",decoded.description,"text") : null,
+    field("Note","Lightning invoices are not on-chain transactions. The summary is decoded from the invoice; use the decoder link for invoice-specific details.","text"),
+    field("Invoice",invoice,"hash"),
+  ].filter(Boolean);
+  return makeOnePage({summaryState:"LIMITED",network:"Lightning",chainId:"lightning",resolvedChain:"lightning",entityType:"invoice",rawId:invoice,fields,explorerBest:REG.lightning_invoice.buildUrl(invoice),agentNote:"Lightning invoice decoded locally. Open the decoder link for full invoice details."});
+}
+
+// Build EVM onePage from probe result (used when probe succeeds at gen time)
+function buildEvmTxOnePageResolved(probe){
+  const fields = [
+    field("Network", probe.chainLabel, "text"),
+    field("Status", probe.status, "status"),
+    field("Confirmations", probe.confirmations != null ? String(probe.confirmations) : "", "text"),
+    field("Block", String(probe.block ?? ""), "text"),
+    field("Timestamp", probe.timestamp || "", "timestamp"),
+    field("From", probe.from, "address"),
+    field("To", probe.to, "address"),
+    field("Value", probe.value, "amount"),
+    field("Fee", probe.fee, "amount"),
+    field("Gas Used", probe.gasUsed != null ? String(probe.gasUsed) : "", "text"),
+    field("Gas Limit", probe.gasLimit != null ? String(probe.gasLimit) : "", "text"),
+    field("Gas Price", probe.gasPrice || "", "amount"),
+    field("Max Fee", probe.maxFeePerGas || "", "amount"),
+    field("Max Priority Fee", probe.maxPriorityFeePerGas || "", "amount"),
+    field("Nonce", probe.nonce != null ? String(probe.nonce) : "", "text"),
+    field("Transaction Type", probe.txType || "", "text"),
+    field("Method ID", probe.methodId || "", "hash"),
+    field("Transaction Hash", probe.txHash, "hash"),
+  ].filter(f => f.value !== "");
+  return makeOnePage({summaryState:"RICH",network:probe.chainLabel,chainId:probe.chainId,resolvedChain:probe.chainId,entityType:"tx",rawId:probe.txHash,fields,explorerBest:REG[probe.typeId].buildUrl(probe.txHash),fetchedAt:new Date().toISOString()});
+}
+
+// EVM TX not found on any chain
+function buildEvmTxOnePageUnresolved(rawId){
+  return makeOnePage({summaryState:"CHAIN_UNRESOLVED",network:"Ethereum, Polygon, or Arbitrum",chainId:"evm",resolvedChain:null,entityType:"tx",rawId,fields:[field("Note","This transaction was not found on Ethereum, Polygon, or Arbitrum.","text"),field("Next step","Confirm the correct network to load the full transaction record.","text"),field("Transaction hash",rawId,"hash")],agentNote:"Confirm the correct network and open that explorer directly."});
+}
+
+// EVM address summary (fetched in parallel at gen time)
+function buildEvmAddrOnePage(address, probeResults){
+  const fields = [field("Type","Address on Ethereum, Polygon, or Arbitrum","text"), field("Address",address,"address")];
+  for (const p of probeResults){
+    fields.push(field(`${p.chainLabel} Balance`, p.balance,"amount"));
+    fields.push(field(`${p.chainLabel} Transactions`, String(p.txCount),"text"));
+  }
+  return makeOnePage({summaryState:"RICH",network:"Ethereum, Polygon, or Arbitrum",chainId:"evm",resolvedChain:null,entityType:"address",rawId:address,fields,explorerBest:REG.ethereum_address.buildUrl(address),fetchedAt:new Date().toISOString()});
+}
+
+/* ─── MAIN GENERATION FUNCTION ───────────────────────────────── */
+// Returns: { resolvedInput, outputs[], recommendedPreviewTypeId, resolvedChain, onePage, agentHint, summaryText, schemaVersion }
+async function buildLookupResult(rawInput, forced){
+  const norm = normalizeInput(rawInput);
+  const input = norm.value;
+  const hinted = norm.hintNetwork;
+
+  if (!input) return {
+    resolvedInput:"", outputs:[], recommendedPreviewTypeId:null,
+    resolvedChain:null, agentHint:"", summaryText:"",
+    onePage: makeOnePage({summaryState:"EMPTY"}), schemaVersion:2,
+  };
+
+  const c = classify(input);
+  let use = (forced==="auto"&&hinted)?hinted : (forced==="auto"?c.network:forced);
+
+  // Ambiguous 64-char hex: probe Tron + BTC APIs to decide
+  if (use==="hex64") use = await detectHex64Network(input);
+
+  const outputs = [];
+  let onePage = makeOnePage({summaryState:"UNSUPPORTED",rawId:input});
+  let resolvedChain = null;
+  let agentHint = "";
+  let recommendedPreviewTypeId = null;
+
+  /* ── TRON ── */
+  if (use==="tron"){
+    if (c.kind==="address"){
+      const item = buildOutputItem("tron_address", input, {isRecommended:true, resolvedChain:"tron"});
+      if (item) outputs.push(item);
+      onePage = makeOnePage({summaryState:"LIMITED",network:"Tron",chainId:"tron",resolvedChain:"tron",entityType:"address",rawId:input,fields:[field("Type","Tron Address","text"),field("Address",input,"address")],explorerBest:REG.tron_address.buildUrl(input)});
+    } else {
+      const tronHash = input.startsWith("0x")?input.slice(2):input;
+      onePage = await buildTronTxOnePage(tronHash);
+      // Always SRCDOC_STATIC — tronscan.org blocks all iframe embedding
+      const item = buildOutputItem("tron_tx", tronHash, {isRecommended:true, resolvedChain:"tron", summaryData: onePage});
+      if (item) outputs.push(item);
+    }
+    resolvedChain = "tron";
+    agentHint = "Tron details are shown when available.";
+  }
+
+  /* ── BITCOIN ── */
+  else if (use==="bitcoin"){
+    if (c.kind==="address"){
+      const item = buildOutputItem("bitcoin_address", input, {isRecommended:true, resolvedChain:"bitcoin"});
+      if (item) outputs.push(item);
+      onePage = makeOnePage({summaryState:"LIMITED",network:"Bitcoin",chainId:"bitcoin",resolvedChain:"bitcoin",entityType:"address",rawId:input,fields:[field("Type","Bitcoin Address","text"),field("Address",input,"address")],explorerBest:REG.bitcoin_address.buildUrl(input)});
+    } else {
+      onePage = await buildBitcoinTxOnePage(input);
+      const item = buildOutputItem("bitcoin_tx", input, {isRecommended:true, resolvedChain:"bitcoin", summaryData:onePage});
+      if (item) outputs.push(item);
+    }
+    resolvedChain = "bitcoin";
+  }
+
+  /* ── SOLANA ── */
+  else if (use==="solana"){
+    onePage = await buildSolanaOnePage(input);
+    const isAddr = onePage.entityType === "address";
+    const primaryTypeId = isAddr ? "solana_address" : "solana_tx";
+    const altTypeId     = isAddr ? "solana_address_explorer" : "solana_tx_explorer";
+
+    const primary = buildOutputItem(primaryTypeId, input, {
+      isRecommended:true,
+      resolvedChain:"solana",
+      summaryData:onePage
+    });
+    const alt = buildOutputItem(altTypeId, input, {
+      isRecommended:false,
+      resolvedChain:"solana"
+    });
+
+    if (primary) outputs.push(primary);
+    if (alt) outputs.push(alt);
+
+    resolvedChain = "solana";
+    recommendedPreviewTypeId = primaryTypeId;
+    agentHint = onePage.agentNote || "Solana details shown when available.";
+  }
+
+  /* ── LIGHTNING ── */
+  else if (use==="lightning"){
+    onePage = buildLightningOnePage(input);
+    const item = buildOutputItem("lightning_invoice", input, {isRecommended:true, resolvedChain:null, summaryData:onePage});
+    if (item) outputs.push(item);
+    resolvedChain = "lightning";
+  }
+
+  /* ── EVM ── */
+  else if (use==="evm"){
+    if (c.kind==="address" || c.kind==="address_or_tx"){
+      // Address: parallel probe all 3 chains at gen time
+      const probeResults = await probeEvmAddress(input);
+      onePage = buildEvmAddrOnePage(input, probeResults);
+      for (const typeId of EVM_ADDR_TYPEIDS){
+        const pr = probeResults.find(p=>p.typeId===typeId);
+        const isRec = typeId===EVM_ADDR_TYPEIDS[0];
+        const item = buildOutputItem(typeId, input, {
+          isRecommended: isRec,
+          resolvedChain: null, // address exists on all chains
+          summaryData:   isRec?onePage:null,
+        });
+        if (item) outputs.push(item);
+      }
+      agentHint = "Address summary shown for Ethereum, Polygon, and Arbitrum.";
+    } else {
+      // TX: sequential probe — stops at first chain that has it
+      const probe = await probeEvmTx(input);
+      if (probe){
+        onePage = buildEvmTxOnePageResolved(probe);
+        resolvedChain = probe.chainId;
+
+        // For EVM transaction hashes, show only the verified chain.
+        // Showing all EVM explorers here makes it look like the app is guessing.
+        const item = buildOutputItem(probe.typeId, input, {
+          isRecommended: true,
+          resolvedChain: probe.chainId,
+          summaryData: onePage,
+        });
+        if (item) outputs.push(item);
+
+        agentHint = `Transaction verified on ${probe.chainLabel}.`;
+      } else {
+        onePage = buildEvmTxOnePageUnresolved(input);
+
+        // Do not recommend Ethereum by default when the transaction was not found.
+        // Keep the result intentionally empty so the summary panel carries the message.
+        agentHint = "Transaction not found on Ethereum, Polygon, or Arbitrum. Please confirm the correct network or paste the full explorer URL.";
+      }
+    }
+  }
+
+  /* ── UNKNOWN FALLBACK ── */
+  else {
+    for (const typeId of ["search_etherscan","search_tronscan","search_mempool","search_solscan"]){
+      const item = buildOutputItem(typeId, input, {isRecommended:typeId==="search_etherscan"});
+      if (item) outputs.push(item);
+    }
+    onePage = makeOnePage({summaryState:"UNSUPPORTED",rawId:input,fields:[field("Note","Unknown format. Try selecting a network manually or paste a full explorer URL.","text")]});
+    agentHint = "Unknown format. Try selecting a network manually or paste a full explorer URL.";
+  }
+
+  // Determine best previewable output
+  const previewable = outputs.filter(o=>o.supportsPreview);
+  const recommended = previewable.find(o=>o.isRecommended) || previewable.sort((a,b)=>a.priority-b.priority)[0] || null;
+  recommendedPreviewTypeId = recommended?.typeId || null;
+
+  const netLabel = onePage.network || use;
+  const summaryText = `${netLabel} ${c.kind.replace("_"," ")}`;
+
+  return {
+    resolvedInput: input, outputs,
+    recommendedPreviewTypeId, resolvedChain,
+    onePage, agentHint, summaryText, schemaVersion:2,
+  };
+}
+
+/* ─── SRCDOC RENDERER ───────────────────────────────────────── */
+function previewTheme(){
+  const dark = document.documentElement.getAttribute("data-theme")!=="light";
+  return {
+    bg:    dark?"#090d14":"#f3f5f9",
+    fg:    dark?"#dde6f5":"#0f1724",
+    muted: dark?"#8fa3be":"#4a5568",
+    bdr:   dark?"#1e2d46":"#dde3ed",
+    card:  dark?"#111827":"#ffffff",
+    card2: dark?"#0f1520":"#f8fafd",
+    ok:    dark?"#3ecf8e":"#059669",
+    okBg:  dark?"rgba(62,207,142,.1)":"rgba(5,150,105,.08)",
+    bad:   dark?"#f87171":"#dc2626",
+    badBg: dark?"rgba(248,113,113,.1)":"rgba(220,38,38,.08)",
+    warn:  dark?"#f59e0b":"#d97706",
+    warnBg:dark?"rgba(245,158,11,.1)":"rgba(217,119,6,.08)",
+    accent:"#ff6a00",
+    info:  dark?"#60a5fa":"#3b82f6",
+    infoBg:dark?"rgba(96,165,250,.1)":"rgba(59,130,246,.08)",
+    mono:  "'JetBrains Mono',ui-monospace,monospace",
+  };
+}
+
+// Build a polished fallback card when preview data is not available or embedding is blocked
+function buildFallbackSrcdoc(item){
+  const t = previewTheme();
+  const networkColors = {tron:"#ef0027",ethereum:"#627eea",polygon:"#8247e5",arbitrum:"#28a0f0",bitcoin:"#f7931a",solana:"#9945ff",lightning:"#f89c27"};
+  const netColor = networkColors[item.chainId] || t.info;
+  const shortHash = item.rawId ? (item.rawId.length > 24 ? item.rawId.slice(0,12)+"…"+item.rawId.slice(-8) : item.rawId) : "";
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',ui-sans-serif,sans-serif;font-size:13px;background:${t.bg};color:${t.fg};display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+    .card{background:${t.card};border:1px solid ${t.bdr};border-radius:12px;padding:28px 24px;max-width:440px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.25);}
+    .icon{font-size:32px;margin-bottom:14px;opacity:.8;}
+    .title{font-size:15px;font-weight:700;margin-bottom:6px;}
+    .sub{font-size:12.5px;color:${t.muted};margin-bottom:20px;line-height:1.55;}
+    .netBadge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;border:1px solid ${netColor}44;background:${netColor}18;color:${netColor};font-size:11.5px;font-weight:600;margin-bottom:16px;}
+    .dot{width:7px;height:7px;border-radius:50%;background:${netColor};flex-shrink:0;}
+    .meta{background:${t.card2};border:1px solid ${t.bdr};border-radius:8px;padding:12px 14px;margin-bottom:20px;text-align:left;}
+    .metaRow{display:flex;gap:10px;align-items:flex-start;padding:4px 0;border-bottom:1px solid ${t.bdr};}
+    .metaRow:last-child{border-bottom:none;}
+    .metaKey{color:${t.muted};font-size:11.5px;font-weight:500;min-width:80px;flex-shrink:0;}
+    .metaVal{font-family:${t.mono};font-size:11px;word-break:break-all;color:${t.fg};}
+    .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;border:1px solid ${t.bdr};background:${t.card};color:${t.fg};font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;font-family:'DM Sans',ui-sans-serif,sans-serif;}
+    .btn-primary{background:linear-gradient(90deg,#ff3b30,#ff6a00,#ff4fa3);border-color:transparent;color:#fff;}
+    .verifiedBadge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:${t.okBg};border:1px solid ${t.ok}44;color:${t.ok};font-size:11px;font-weight:600;margin-top:10px;}
+  </style></head><body>
+  <div class="card">
+    <div class="icon">🔍</div>
+    <div class="netBadge"><span class="dot"></span>${esc(item.network||item.chainId||"")}</div>
+    <div class="title">Open ${esc(item.shortLabel||"Explorer")} for full details</div>
+    <div class="sub">Direct embedding of ${esc(item.shortLabel||"this explorer")} is restricted by its security policy. View the complete transaction page in a new tab.</div>
+    <div class="meta">
+      ${item.rawId ? `<div class="metaRow"><span class="metaKey">Hash / ID</span><span class="metaVal">${esc(item.rawId)}</span></div>` : ""}
+      <div class="metaRow"><span class="metaKey">Explorer</span><span class="metaVal">${esc(item.shortLabel||"")}</span></div>
+      <div class="metaRow"><span class="metaKey">Network</span><span class="metaVal">${esc(item.network||"")}</span></div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-primary" href="${esc(item.url)}" target="_blank" rel="noreferrer">↗ Open ${esc(item.shortLabel||"Explorer")}</a>
+    </div>
+    <div><span class="verifiedBadge">✓ Verified explorer link</span></div>
+  </div>
+  </body></html>`;
+}
+
+function statusBadge(s,t){
+  if (!s||s==="N/A") return `<span style="color:${t.warn}">Not available</span>`;
+  if (s==="Confirmed"||s==="Unconfirmed"&&false) return `<span style="display:inline-block;padding:1px 10px;border-radius:999px;background:${t.okBg};color:${t.ok};border:1px solid ${t.ok}33;font-size:11px;font-weight:600;">✓ ${esc(s)}</span>`;
+  if (s==="Confirmed") return `<span style="display:inline-block;padding:1px 10px;border-radius:999px;background:${t.okBg};color:${t.ok};border:1px solid ${t.ok}33;font-size:11px;font-weight:600;">✓ Confirmed</span>`;
+  if (s==="Failed")    return `<span style="display:inline-block;padding:1px 10px;border-radius:999px;background:${t.badBg};color:${t.bad};border:1px solid ${t.bad}33;font-size:11px;font-weight:600;">✗ Failed</span>`;
+  if (s==="Unconfirmed") return `<span style="display:inline-block;padding:1px 10px;border-radius:999px;background:${t.warnBg};color:${t.warn};border:1px solid ${t.warn}33;font-size:11px;font-weight:600;">⏳ Unconfirmed</span>`;
+  return `<span style="display:inline-block;padding:1px 10px;border-radius:999px;background:${t.warnBg};color:${t.warn};border:1px solid ${t.warn}33;font-size:11px;font-weight:600;">${esc(s)}</span>`;
+}
+
+function renderFieldValue(f, t){
+  switch(f.valueType){
+    case "status":    return statusBadge(f.value,t);
+    case "hash":      return `<span style="font-family:${t.mono};font-size:11.5px;word-break:break-all;">${esc(f.value)}</span>`;
+    case "address":   return `<span style="font-family:${t.mono};font-size:11.5px;word-break:break-all;">${esc(f.value)}</span>`;
+    case "amount":    return `<span style="font-weight:700;color:${t.fg};">${esc(f.value)}</span>`;
+    case "timestamp": return `<span style="color:${t.muted};font-size:12px;">${esc(f.value)}</span>`;
+    default:          return esc(f.value);
+  }
+}
+
+function buildPreviewSrcdoc(title, fields, explorerUrl, note, networkLabel){
+  const t = previewTheme();
+  const rows = fields.map(f=>`<tr><td class="k">${esc(f.key)}</td><td class="v">${renderFieldValue(f,t)}</td></tr>`).join("");
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;} body{margin:0;padding:18px 20px 24px;font-family:'DM Sans',ui-sans-serif,sans-serif;font-size:13px;background:${t.bg};color:${t.fg};line-height:1.5;}
+    .hdr{margin-bottom:14px;} h2{margin:0 0 3px;font-size:15px;font-weight:700;} .sub{font-size:11.5px;color:${t.muted};}
+    .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;border:1px solid;font-size:11px;font-weight:600;white-space:nowrap;}
+    .badge-ok{background:${t.okBg};color:${t.ok};border-color:${t.ok}44;}
+    .badge-info{background:${t.infoBg};color:${t.info};border-color:${t.info}44;}
+    .badge-muted{background:transparent;color:${t.muted};border-color:${t.bdr};}
+    table{width:100%;border-collapse:collapse;} td{padding:7px 6px;border-bottom:1px solid ${t.bdr};vertical-align:top;}
+    .k{color:${t.muted};width:140px;font-size:11.5px;font-weight:500;white-space:nowrap;padding-right:10px;}
+    .v{word-break:break-all;}
+    .footer{margin-top:16px;padding-top:12px;border-top:1px solid ${t.bdr};font-size:11.5px;color:${t.muted};display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .footer a{color:${t.accent};word-break:break-all;} .footer-right{margin-left:auto;}
+    .note{margin-top:10px;padding:8px 10px;border-radius:6px;background:${t.warnBg};color:${t.warn};font-size:12px;border:1px solid ${t.warn}33;}
+    .verifiedBadge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:${t.okBg};border:1px solid ${t.ok}44;color:${t.ok};font-size:11px;font-weight:600;}
+  </style></head><body>
+  <div class="hdr">
+    <h2>${esc(title)}</h2>
+    <div class="sub">Explorer Preview · Triple-A Scan</div>
+    <div class="badges">
+      <span class="badge badge-info">◈ Live summary</span>
+      ${networkLabel?`<span class="badge badge-muted">${esc(networkLabel)}</span>`:""}
+      <span class="badge badge-ok">✓ Verified data</span>
+    </div>
+  </div>
+  <table>${rows}</table>
+  ${note?`<div class="note">ℹ ${esc(note)}</div>`:""}
+  <div class="footer">
+    <span>🔗 <a href="${esc(explorerUrl)}" target="_blank" rel="noreferrer">${esc(explorerUrl)}</a></span>
+    <span class="footer-right"><span class="verifiedBadge">✓ Verified explorer link</span></span>
+  </div>
+  </body></html>`;
+}
+
+function loadingSrcdoc(){
+  const t = previewTheme();
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:${t.bg};color:${t.muted};font-family:ui-sans-serif,sans-serif;font-size:13px;}
+    .sp{width:22px;height:22px;border:2.5px solid ${t.bdr};border-top-color:${t.accent};border-radius:50%;animation:s .75s linear infinite;margin-right:10px;}
+    @keyframes s{to{transform:rotate(360deg)}}
+  </style></head><body><div class="sp"></div>Loading explorer preview…</body></html>`;
+}
+
+// Build srcdoc from a pre-fetched onePage (SRCDOC_STATIC strategy)
+function buildSrcdocFromOnePage(onePage, explorerUrl){
+  if (!onePage || !onePage.fields || !onePage.fields.length) return buildFallbackSrcdoc({url:explorerUrl,rawId:onePage?.rawId||"",network:onePage?.network||"",chainId:onePage?.chainId||"",shortLabel:"Explorer"});
+  const typeLabel = onePage.entityType==="address"?"Address":onePage.entityType==="invoice"?"Invoice":"Transaction";
+  const title = `${onePage.network} ${typeLabel}`;
+  return buildPreviewSrcdoc(title, onePage.fields, explorerUrl||onePage.explorerBest||"", onePage.agentNote, onePage.network);
+}
+
+// Build srcdoc from live EVM RPC fetch (SRCDOC_LIVE strategy)
+async function buildSrcdocLiveEvm(item){
+  const t = previewTheme();
+  if (item.entityType==="address"){
+    const results = await probeEvmAddress(item.rawId);
+    const fields = [
+      field("Type","Address on Ethereum, Polygon, or Arbitrum","text"),
+      field("Address",item.rawId,"address"),
+    ];
+    for (const r of results){
+      fields.push(field(`${r.chainLabel} Balance`,r.balance,"amount"));
+      fields.push(field(`${r.chainLabel} Transactions`,String(r.txCount),"text"));
+    }
+    return buildPreviewSrcdoc("Address on Ethereum, Polygon, or Arbitrum", fields, item.url, "Balances fetched from public RPCs.", "EVM");
+  } else {
+    // TX: try this specific chain first, fall back to probe
+    const r = REG[item.typeId];
+    const [tx,receipt] = await Promise.all([
+      evmRpc(r.rpc,"eth_getTransactionByHash",[item.rawId]),
+      evmRpc(r.rpc,"eth_getTransactionReceipt",[item.rawId])
+    ]);
+    if (tx?.hash){
+      const block  = hexDec(tx.blockNumber);
+      const status = receipt?(receipt.status==="0x1"?"Confirmed":"Failed"):"Pending";
+      let fee="—";
+      try{ if(tx.gasPrice&&receipt?.gasUsed) fee=weiToNative(BigInt(tx.gasPrice)*BigInt(receipt.gasUsed),r.symbol); } catch{}
+      const blockData = block!=null ? await evmRpc(r.rpc,"eth_getBlockByNumber",[tx.blockNumber, false]) : null;
+      const latestBlockHex = await evmRpc(r.rpc,"eth_blockNumber",[]);
+      const latestBlock = hexDec(latestBlockHex);
+      const confirmations = (block!=null && latestBlock!=null && latestBlock >= block) ? (latestBlock - block + 1) : null;
+      const timestamp = blockData?.timestamp ? fmtUnix(hexDec(blockData.timestamp)) : "";
+      const gasPrice = tx.gasPrice ? weiToNative(tx.gasPrice, r.symbol) : "";
+      const maxFeePerGas = tx.maxFeePerGas ? weiToNative(tx.maxFeePerGas, r.symbol) : "";
+      const maxPriorityFeePerGas = tx.maxPriorityFeePerGas ? weiToNative(tx.maxPriorityFeePerGas, r.symbol) : "";
+      const gasLimit = hexDec(tx.gas);
+      const gasUsed = hexDec(receipt?.gasUsed);
+      const txType = tx.type != null ? String(hexDec(tx.type)) : "";
+      const nonce = tx.nonce != null ? hexDec(tx.nonce) : null;
+      const inputData = tx.input || "";
+      const methodId = inputData && inputData !== "0x" ? inputData.slice(0,10) : "";
+      const fields = [
+        field("Network", r.network, "text"),
+        field("Status", status, "status"),
+        field("Confirmations", confirmations != null ? String(confirmations) : "", "text"),
+        field("Block", String(block ?? ""), "text"),
+        field("Timestamp", timestamp, "timestamp"),
+        field("From", tx.from || "", "address"),
+        field("To", tx.to || "", "address"),
+        field("Value", weiToNative(tx.value || "0x0", r.symbol), "amount"),
+        field("Fee", fee, "amount"),
+        field("Gas Used", gasUsed != null ? String(gasUsed) : "", "text"),
+        field("Gas Limit", gasLimit != null ? String(gasLimit) : "", "text"),
+        field("Gas Price", gasPrice, "amount"),
+        field("Max Fee", maxFeePerGas, "amount"),
+        field("Max Priority Fee", maxPriorityFeePerGas, "amount"),
+        field("Nonce", nonce != null ? String(nonce) : "", "text"),
+        field("Transaction Type", txType, "text"),
+        field("Method ID", methodId, "hash"),
+        field("Transaction Hash", tx.hash, "hash"),
+      ].filter(f=>f.value!=="");
+      return buildPreviewSrcdoc(`${r.network} Transaction`, fields, item.url, null, r.network);
+    }
+    // Not found on this chain — show polished fallback
+    return buildFallbackSrcdoc(item);
+  }
+}
+
+/* ─── SHOW PREVIEW (strategy dispatch) ─────────────────────── */
+let currentPreviewItem = null;
+
+async function showPreview(item){
+  if (!item||!item.supportsPreview) return;
+  currentPreviewItem = item;
+
+  $("viewerWrap").style.display = "block";
+  $("viewerUrl").textContent = item.url;
+
+  const viewer = $("viewer");
+  const badge = $("viewerBadge");
+
+  switch(item.previewStrategy){
+    case "SRCDOC_STATIC":
+      // Data already fetched — instant render
+      viewer.removeAttribute("src");
+      if (item.summaryData) {
+        badge.textContent = "◈ Explorer Preview";
+        badge.className = "pill pill-info";
+        viewer.srcdoc = buildSrcdocFromOnePage(item.summaryData, item.url);
+      } else {
+        badge.textContent = "◈ Explorer Preview";
+        badge.className = "pill pill-warn";
+        viewer.srcdoc = buildFallbackSrcdoc(item);
+      }
+      break;
+
+    case "SRCDOC_LIVE":
+      // Fetch and render — show spinner while loading
+      viewer.removeAttribute("src");
+      badge.textContent = "◈ Loading…";
+      badge.className = "pill pill-muted";
+      viewer.srcdoc = loadingSrcdoc();
+      const srcdoc = await buildSrcdocLiveEvm(item);
+      if (currentPreviewItem?.typeId===item.typeId && currentPreviewItem?.rawId===item.rawId){
+        badge.textContent = "◈ Explorer Preview";
+        badge.className = "pill pill-info";
+        viewer.srcdoc = srcdoc;
+      }
+      break;
+
+    case "OPEN_ONLY":
+      // No embed possible — show a polished fallback card
+      viewer.removeAttribute("src");
+      badge.textContent = "◈ Explorer only";
+      badge.className = "pill pill-muted";
+      viewer.srcdoc = buildFallbackSrcdoc(item);
+      break;
+
+    default:
+      // Unknown strategy — safe fallback
+      viewer.removeAttribute("src");
+      badge.textContent = "◈ Explorer Preview";
+      badge.className = "pill pill-muted";
+      viewer.srcdoc = buildFallbackSrcdoc(item);
+      break;
+  }
+}
+
+function clearPreview(){
+  currentPreviewItem = null;
+  const viewer = $("viewer");
+  viewer.removeAttribute("srcdoc");
+  viewer.src = "about:blank";
+  $("viewerWrap").style.display = "none";
+}
+
+/* ─── RENDER OUTPUTS ─────────────────────────────────────────── */
+function renderOutputs(outputs){
+  const container = $("outputList");
+  const emptyState = $("outputListEmpty");
+  const note = $("explorerNote");
+  container.innerHTML = "";
+
+  const valid = outputs.filter(o=>o!=null);
+
+  if (!valid.length){
+    emptyState.style.display = "flex";
+    note.style.display = "none";
+    return;
+  }
+  emptyState.style.display = "none";
+  note.style.display = "block";
+
+  // Sort: recommended first, then by priority
+  const primary   = valid.filter(o=>!o.isSecondary);
+  const secondary = valid.filter(o=>o.isSecondary);
+  const sorted = [
+    ...[...primary].sort((a,b)=>(a.isRecommended?-1:1)-(b.isRecommended?-1:1)||a.priority-b.priority),
+    ...[...secondary].sort((a,b)=>a.priority-b.priority),
+  ];
+
+  function buildChip(item, isSecondaryChip){
+    const r = REG[item.typeId];
+    if (!r) return null;
+
+    const chip = document.createElement("div");
+    chip.className = "outputChip"
+      + (item.isRecommended?" is-recommended":"")
+      + ((item.reasonDisabled&&!item.isRecommended)||isSecondaryChip?" is-disabled":"");
+
+    const left = document.createElement("div");
+    left.className = "chipLeft";
+
+    const topRow = document.createElement("div");
+    topRow.className = "chipTopRow";
+
+    const dot = document.createElement("span");
+    dot.className = `chipNetDot ${netDotClass(item.chainId)}`;
+    topRow.appendChild(dot);
+
+    const name = document.createElement("span");
+    name.className = "chipName";
+    name.textContent = item.label;
+    topRow.appendChild(name);
+
+    const badges = document.createElement("div");
+    badges.className = "chipBadges";
+
+    if (item.isRecommended){
+      const b = document.createElement("span");
+      b.className = "pill badge-rec";
+      b.textContent = "★ Recommended";
+      badges.appendChild(b);
+    }
+    const isDataVerified = item.resolvedChain && !item.reasonDisabled && item.summaryData?.summaryState === "RICH";
+    if (isDataVerified){
+      const b = document.createElement("span");
+      b.className = "pill badge-verified";
+      b.textContent = "✓ Verified explorer";
+      badges.appendChild(b);
+    }
+    if (item.reasonDisabled && !isSecondaryChip){
+      const b = document.createElement("span");
+      b.className = "pill badge-unresolved";
+      b.textContent = item.reasonDisabled==="chain_not_confirmed"?"Not on this chain":"Unavailable";
+      badges.appendChild(b);
+    }
+
+    // Strategy label (no NATIVE_IFRAME)
+    if (!item.reasonDisabled && !isSecondaryChip){
+      let stratLabel, stratClass;
+      if (item.previewStrategy==="SRCDOC_STATIC"||item.previewStrategy==="SRCDOC_LIVE"){
+        stratLabel = "◈ Explorer preview"; stratClass = "badge-preview";
+      } else if (item.previewStrategy==="OPEN_ONLY"){
+        stratLabel = "↗ View in explorer"; stratClass = "badge-link";
+      } else {
+        stratLabel = "◈ Explorer preview"; stratClass = "badge-preview";
+      }
+      const b = document.createElement("span");
+      b.className = `pill ${stratClass}`;
+      b.textContent = stratLabel;
+      badges.appendChild(b);
+    }
+
+    left.appendChild(topRow);
+    if (badges.children.length) left.appendChild(badges);
+
+    const sub = document.createElement("div");
+    sub.className = "chipSubtext";
+    sub.textContent = item.url;
+    left.appendChild(sub);
+
+    chip.appendChild(left);
+
+    const actions = document.createElement("div");
+    actions.className = "chipActions";
+
+    if (item.supportsPreview && !item.reasonDisabled && !isSecondaryChip){
+      const previewBtn = document.createElement("button");
+      previewBtn.className = "btn btn-sm" + (item.isRecommended?" btn-primary":"");
+      previewBtn.textContent = (item.previewStrategy==="SRCDOC_STATIC"||item.previewStrategy==="SRCDOC_LIVE") ? "Explorer preview" : "Preview";
+      previewBtn.addEventListener("click", () => showPreview(item));
+      actions.appendChild(previewBtn);
+    }
+
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "btn btn-sm";
+    copyBtn.textContent = "Copy URL";
+    copyBtn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(item.url); toast("URL copied"); } catch { alert("Clipboard copy failed."); }
+    });
+    actions.appendChild(copyBtn);
+
+    const tabBtn = document.createElement("button");
+    tabBtn.className = "btn btn-sm";
+    tabBtn.textContent = "↗";
+    tabBtn.title = "Open in new tab";
+    tabBtn.addEventListener("click", () => window.open(item.url,"_blank","noreferrer"));
+    actions.appendChild(tabBtn);
+
+    chip.appendChild(actions);
+    return chip;
+  }
+
+  // Render primary chips
+  for (const item of primary.sort((a,b)=>(a.isRecommended?-1:1)-(b.isRecommended?-1:1)||a.priority-b.priority)){
+    const chip = buildChip(item, false);
+    if (chip) container.appendChild(chip);
+  }
+
+  // Render secondary chains (collapsed by default)
+  if (secondary.length > 0){
+    const toggleEl = document.createElement("div");
+    toggleEl.className = "secondaryChainToggle";
+    toggleEl.innerHTML = `<span>▸</span><span>Other EVM chains (${secondary.length}) — not confirmed</span>`;
+    container.appendChild(toggleEl);
+
+    const secList = document.createElement("div");
+    secList.className = "secondaryChains hidden";
+    for (const item of secondary){
+      const chip = buildChip(item, true);
+      if (chip) secList.appendChild(chip);
+    }
+    container.appendChild(secList);
+
+    toggleEl.addEventListener("click", () => {
+      const hidden = secList.classList.toggle("hidden");
+      toggleEl.querySelector("span").textContent = hidden ? "▸" : "▾";
+    });
+  }
+}
+
+/* ─── RENDER SUMMARY PANEL ──────────────────────────────────── */
+function renderSummaryPanel(onePage){
+  const body = $("summaryBody");
+  body.innerHTML = "";
+
+  if (!onePage || onePage.summaryState==="EMPTY"){
+    body.innerHTML = `<div class="emptyState"><div class="emptyStateIcon">⬡</div><div class="emptyStateText">No lookup yet</div><div class="emptyStateSub">Paste a value above and click View transaction</div></div>`;
+    return;
+  }
+
+  // State bar with quality badge
+  const stateBar = document.createElement("div");
+  const stateConfig = {
+    RICH:            {cls:"state-rich",      icon:"✓", label:"Full summary",        pillCls:"pill-ok"},
+    LIMITED:         {cls:"state-limited",   icon:"ℹ", label:"Limited summary",     pillCls:"pill-warn"},
+    FETCH_FAILED:    {cls:"state-failed",    icon:"✕", label:"Unable to load",      pillCls:"pill-danger"},
+    CHAIN_UNRESOLVED:{cls:"state-unresolved",icon:"?", label:"Network not found",   pillCls:"pill-warn"},
+    UNSUPPORTED:     {cls:"",               icon:"—", label:"Explorer only",        pillCls:"pill-muted"},
+    EMPTY:           {cls:"",               icon:"—", label:"Empty",               pillCls:"pill-muted"},
+  };
+  const sc = stateConfig[onePage.summaryState]||stateConfig.UNSUPPORTED;
+  stateBar.className = `summaryStateBar ${sc.cls}`;
+
+  const qualityPill = document.createElement("span");
+  qualityPill.className = `pill ${sc.pillCls}`;
+  qualityPill.textContent = `${sc.icon} ${sc.label}`;
+  stateBar.appendChild(qualityPill);
+
+  // Verified chain badge
+  if (onePage.resolvedChain && onePage.summaryState==="RICH"){
+    const verifiedPill = document.createElement("span");
+    verifiedPill.className = "pill pill-ok";
+    verifiedPill.style.cssText = "margin-left:4px;";
+    verifiedPill.textContent = `✓ ${onePage.resolvedChain}`;
+    stateBar.appendChild(verifiedPill);
+  }
+
+  if (onePage.fetchedAt){
+    const at = document.createElement("span");
+    at.style.cssText = "font-size:11px;color:var(--fg3);margin-left:auto;";
+    at.textContent = "Fetched " + (onePage.fetchedAt.slice(0,19).replace("T"," ")) + " UTC";
+    stateBar.appendChild(at);
+  }
+  body.appendChild(stateBar);
+
+  // Fetch error banner
+  if (onePage.summaryState==="FETCH_FAILED" && onePage.fetchError){
+    const errEl = document.createElement("div");
+    errEl.className = "pill pill-danger";
+    errEl.style.cssText = "display:block;margin-bottom:10px;border-radius:6px;padding:8px 10px;";
+    errEl.textContent = onePage.fetchError;
+    body.appendChild(errEl);
+  }
+
+  // KV table with copyable hashes
+  if (onePage.fields && onePage.fields.length){
+    const kv = document.createElement("div");
+    kv.className = "kvTable";
+    for (const f of onePage.fields){
+      const k = document.createElement("div");
+      k.className = "kvKey";
+      k.textContent = f.key;
+      const v = document.createElement("div");
+      v.className = "kvVal";
+      switch(f.valueType){
+        case "hash":
+        case "address": {
+          // Copyable hash/address
+          const wrapper = document.createElement("span");
+          wrapper.className = "copyableHash mono";
+          wrapper.title = "Click to copy";
+          wrapper.innerHTML = `${esc(f.value)}<span class="copyIcon">⎘</span>`;
+          wrapper.addEventListener("click", async () => {
+            try { await navigator.clipboard.writeText(f.value); toast("Copied"); } catch {}
+          });
+          v.appendChild(wrapper);
+          break;
+        }
+        case "status":  v.innerHTML = summaryStatusBadge(f.value); break;
+        case "amount":  v.innerHTML = `<strong style="color:var(--fg);font-size:13.5px;">${esc(f.value)}</strong>`; break;
+        default:        v.textContent = f.value; break;
+      }
+      kv.appendChild(k);
+      kv.appendChild(v);
+    }
+    body.appendChild(kv);
+  }
+
+  // Agent note
+  if (onePage.agentNote){
+    const note = document.createElement("div");
+    note.style.cssText = "margin-top:10px;padding:8px 10px;border-radius:6px;background:var(--warnBg);color:var(--warn);font-size:12px;border:1px solid var(--warnBorder);";
+    note.textContent = "ℹ " + onePage.agentNote;
+    body.appendChild(note);
+  }
+
+  // Verified explorer link
+  if (onePage.explorerBest){
+    const link = document.createElement("div");
+    link.style.cssText = "margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--card2);border:1px solid var(--border2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;";
+    link.innerHTML = `<span class="pill pill-ok" style="flex-shrink:0;">✓ Verified explorer</span><a href="${esc(onePage.explorerBest)}" target="_blank" rel="noreferrer" style="font-size:12px;word-break:break-all;flex:1;">${esc(onePage.explorerBest)}</a>`;
+    body.appendChild(link);
+  }
+}
+
+function summaryStatusBadge(s){
+  if (!s||s==="N/A") return `<span class="pill pill-muted">N/A</span>`;
+  if (s==="Confirmed")   return `<span class="pill pill-ok">✓ Confirmed</span>`;
+  if (s==="Failed")      return `<span class="pill pill-danger">✕ Failed</span>`;
+  if (s==="Unconfirmed") return `<span class="pill pill-warn">⏳ Unconfirmed</span>`;
+  if (s==="Pending")     return `<span class="pill pill-warn">⏳ Pending</span>`;
+  return `<span class="pill pill-warn">${esc(s)}</span>`;
+}
+
+/* ─── CLASSIFICATION BADGES ─────────────────────────────────── */
+function renderClassificationBadges(result){
+  const el = $("classificationBadges");
+  el.innerHTML = "";
+  if (!result.resolvedInput) return;
+
+  const netBadge = document.createElement("span");
+  netBadge.className = "pill pill-accent";
+  netBadge.textContent = result.onePage.network || result.detectedNetwork || "Unknown";
+  el.appendChild(netBadge);
+
+  if (result.resolvedChain){
+    const cb = document.createElement("span");
+    cb.className = "pill pill-ok";
+    cb.textContent = "✓ " + result.resolvedChain;
+    el.appendChild(cb);
+  }
+
+  const stateBadge = document.createElement("span");
+  const sm = {RICH:"pill-ok",LIMITED:"pill-warn",FETCH_FAILED:"pill-danger",CHAIN_UNRESOLVED:"pill-warn",UNSUPPORTED:"pill-muted"};
+  const sl = {RICH:"Full summary",LIMITED:"Limited summary",FETCH_FAILED:"Unable to load",CHAIN_UNRESOLVED:"Check network",UNSUPPORTED:"Explorer only",EMPTY:""};
+  stateBadge.className = "pill " + (sm[result.onePage.summaryState]||"pill-muted");
+  stateBadge.textContent = sl[result.onePage.summaryState]||"";
+  if (stateBadge.textContent) el.appendChild(stateBadge);
+
+  $("agentHint").textContent = result.agentHint||"";
+}
+
+/* ─── SUPPORT SUMMARY TEXT ──────────────────────────────────── */
+function makeSupportSummary(result){
+  const op = result.onePage;
+  if (!op || op.summaryState==="EMPTY") return "Transaction Summary\n\n(No data)";
+  const lines = ["Transaction Summary",""];
+  if (op.network) lines.push(`Network: ${op.network}`);
+  if (op.resolvedChain) lines.push(`Resolved chain: ${op.resolvedChain}`);
+  if (op.summaryState!=="RICH") lines.push(`Data: ${({LIMITED:"Partial summary",FETCH_FAILED:"Unable to load",CHAIN_UNRESOLVED:"Network not identified",UNSUPPORTED:"No summary",EMPTY:"No data"}[op.summaryState]||op.summaryState)}`);
+  for (const f of (op.fields||[])){
+    if (f.value) lines.push(`${f.key}: ${f.value}`);
+  }
+  if (op.agentNote) lines.push(`Note: ${op.agentNote}`);
+  lines.push(`Input: ${op.rawId||result.resolvedInput}`);
+  if (op.explorerBest) lines.push(`\nOpen full page: ${op.explorerBest}`);
+  const outs = (result.outputs||[]).filter(o=>!o.isSecondary && !o.reasonDisabled);
+  if (outs.length){ lines.push(""); lines.push("Links:"); for(const o of outs) lines.push(`- : `); }
+  return lines.join("\n");
+}
+
+/* ─── HISTORY ────────────────────────────────────────────────── */
+const HIST_KEY = "ta_lookup_history_v8";
+const HIST_LEGACY_KEY = "ta_lookup_history_v7";
+
+function migrateHistory(){
+  const legacy = JSON.parse(localStorage.getItem(HIST_LEGACY_KEY)||"[]");
+  if (!legacy.length) return;
+  const migrated = legacy.map(old=>({
+    schemaVersion:2,
+    when:old.when, whenDisplay:old.when,
+    input:old.input||"",
+    network:"", chainId:"", entityType:"tx", resolvedChain:null,
+    displayLabel:old.summaryText||old.input||"",
+    onePage:null, outputs:[], recommendedOutput: old.bestUrl?{typeId:"legacy_unknown",label:"History link",url:old.bestUrl,supportsPreview:false,supportsOpenInNewTab:true,previewStrategy:"OPEN_ONLY",isRecommended:true,rawId:""}:null,
+  }));
+  const existing = JSON.parse(localStorage.getItem(HIST_KEY)||"[]");
+  localStorage.setItem(HIST_KEY, JSON.stringify([...migrated,...existing].slice(0,30)));
+}
+
+function saveHistory(result){
+  if (!result.resolvedInput) return;
+  const recommended = result.outputs.find(o=>o.isRecommended) || result.outputs[0] || null;
+  const entry = {
+    schemaVersion:2,
+    when: new Date().toISOString(),
+    whenDisplay: nowStamp(),
+    input: result.resolvedInput,
+    network: result.onePage?.network||"",
+    chainId: result.onePage?.chainId||"",
+    entityType: result.onePage?.entityType||"tx",
+    resolvedChain: result.resolvedChain,
+    displayLabel: result.summaryText||result.resolvedInput,
+    onePage: result.onePage,
+    outputs: result.outputs,
+    recommendedOutput: recommended,
+  };
+  const existing = JSON.parse(localStorage.getItem(HIST_KEY)||"[]");
+  localStorage.setItem(HIST_KEY, JSON.stringify([entry,...existing].slice(0,30)));
+  renderHistory();
+}
+
+function renderHistory(){
+  const items = JSON.parse(localStorage.getItem(HIST_KEY)||"[]");
+  const body = $("historyBody");
+  body.innerHTML = "";
+
+  if (!items.length){
+    body.innerHTML = `<div class="historyEmpty">No history yet — lookups will appear here</div>`;
+    return;
+  }
+
+  items.forEach(it => {
+    const entry = document.createElement("div");
+    entry.className = "historyEntry";
+    entry.title = it.input;
+
+    const dot = document.createElement("span");
+    dot.className = `historyNetDot ${netDotClass(it.chainId||"")}`;
+    entry.appendChild(dot);
+
+    const main = document.createElement("div");
+    main.className = "historyEntryMain";
+
+    const label = document.createElement("div");
+    label.className = "historyEntryLabel";
+    label.textContent = it.displayLabel || it.input;
+    main.appendChild(label);
+
+    const meta = document.createElement("div");
+    meta.className = "historyEntryMeta";
+    meta.textContent = it.input;
+    main.appendChild(meta);
+
+    entry.appendChild(main);
+
+    const timeEl = document.createElement("div");
+    timeEl.className = "historyEntryTime";
+    // Relative-ish time
+    const ago = it.when ? relTime(it.when) : (it.whenDisplay||"");
+    timeEl.textContent = ago;
+    entry.appendChild(timeEl);
+
+    entry.addEventListener("click", () => restoreFromHistory(it));
+    body.appendChild(entry);
+  });
+}
+
+function relTime(iso){
+  try{
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff/60000);
+    if (m<1) return "just now";
+    if (m<60) return `${m}m ago`;
+    const h = Math.floor(m/60);
+    if (h<24) return `${h}h ago`;
+    return `${Math.floor(h/24)}d ago`;
+  } catch{ return ""; }
+}
+
+function restoreFromHistory(entry){
+  if (entry.schemaVersion < 2 || !entry.onePage){
+    // Legacy: open best URL
+    const url = entry.recommendedOutput?.url || entry.bestUrl;
+    if (url) window.open(url,"_blank","noreferrer");
+    toast("Legacy history — opening in new tab");
+    return;
+  }
+  // Restore full state
+  $("q").value = entry.input;
+  renderOutputs(entry.outputs||[]);
+  renderSummaryPanel(entry.onePage);
+  $("summaryMeta").textContent = `Restored · ${entry.whenDisplay}`;
+  renderClassificationBadges({...entry, resolvedInput:entry.input, detectedNetwork:entry.network});
+  // Auto-preview recommended
+  if (entry.recommendedOutput?.supportsPreview){
+    showPreview(entry.recommendedOutput);
+  }
+  toast("History restored");
+}
+
+/* ─── PERMALINKS ─────────────────────────────────────────────── */
+function updatePermalink(v){ history.replaceState(null,"",v?`#q=${encodeURIComponent(v)}`:"#"); }
+function readPermalink(){ const m=(window.location.hash||"").match(/#q=([^&]+)/); if(m){ try{return decodeURIComponent(m[1]);}catch{} } return ""; }
+
+/* ─── COPY ───────────────────────────────────────────────────── */
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); toast("Copied"); } catch{ alert("Clipboard copy failed."); } }
+
+/* ─── SINGLE MODE ────────────────────────────────────────────── */
+let lastResult = null;
+
+async function generateSingle(){
+  const raw = $("q").value;
+  const forced = $("network").value;
+  const c0 = classify(normalizeInput(raw).value);
+  $("gen").textContent = c0.network==="evm" ? "Detecting network…" : "Generating…";
+  $("gen").disabled = true;
+
+  // Important: clear the previous preview before starting a new lookup.
+  // Without this, a slow previous EVM preview can remain visible after a Lightning or Solana lookup.
+  clearPreview();
+
+  try{
+    const result = await buildLookupResult(raw, forced);
+    lastResult = result;
+
+    renderClassificationBadges(result);
+    renderOutputs(result.outputs);
+    renderSummaryPanel(result.onePage);
+    $("summaryMeta").textContent = result.resolvedInput ? `${nowStamp()} · 1 item` : "";
+    updatePermalink(raw||"");
+
+    if (result.outputs.length) saveHistory(result);
+
+    // Show the internal preview automatically after each single lookup.
+    // This keeps Lightning and Solana from looking incomplete when their details are limited.
+    const best = result.outputs.find(o=>o.isRecommended&&o.supportsPreview) || result.outputs.find(o=>o.supportsPreview);
+    if (best) await showPreview(best);
+  } finally {
+    $("gen").textContent = "View transaction";
+    $("gen").disabled = false;
+  }
+}
+
+/* ─── BULK MODE ──────────────────────────────────────────────── */
+async function generateBulk(){
+  const raw = $("bulk").value||"";
+  const forced = $("network").value;
+  const lines = raw.split("\n").map(s=>s.trim()).filter(Boolean);
+
+  if (!lines.length){
+    $("classificationBadges").innerHTML = `<span class="pill pill-danger">Paste at least one item</span>`;
+    return;
+  }
+
+  $("gen").textContent = "Generating…";
+  $("gen").disabled = true;
+
+  try{
+    const rows = [];
+    for (const line of lines.slice(0,50)){
+      const r = await buildLookupResult(line, forced);
+      rows.push(r);
+    }
+
+    // Render bulk table
+    const container = $("bulkResults");
+    container.innerHTML = "";
+
+    const counter = document.createElement("div");
+    counter.className = "bulkCounter";
+    counter.textContent = `${rows.length} item${rows.length!==1?"s":""} — click Preview or ↗ to open`;
+    container.appendChild(counter);
+
+    const tableWrap = document.createElement("div");
+    tableWrap.style.overflowX = "auto";
+
+    const table = document.createElement("table");
+    table.className = "bulkTable";
+    table.innerHTML = `<thead><tr><th>Input</th><th>Network</th><th>Chain</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+
+    for (const r of rows){
+      const op = r.onePage;
+      const recommended = r.outputs.find(o=>o.isRecommended)||r.outputs[0]||null;
+
+      const stateClass = {RICH:"pill-ok",LIMITED:"pill-warn",FETCH_FAILED:"pill-danger",CHAIN_UNRESOLVED:"pill-warn",UNSUPPORTED:"pill-muted",EMPTY:"pill-muted"}[op?.summaryState||"EMPTY"]||"pill-muted";
+      const stateLabel = {RICH:"Confirmed",LIMITED:"Partial",FETCH_FAILED:"Unable to load",CHAIN_UNRESOLVED:"Check network",UNSUPPORTED:"—",EMPTY:"—"}[op?.summaryState||"EMPTY"]||"—";
+      // Override label with actual tx status if RICH
+      const txStatus = op?.fields?.find(f=>f.key==="Status")?.value||stateLabel;
+
+      const tr = document.createElement("tr");
+
+      const tdInput = document.createElement("td");
+      tdInput.innerHTML = `<div class="bulkInputCell mono">${esc(r.resolvedInput)}</div>`;
+      tr.appendChild(tdInput);
+
+      const tdNet = document.createElement("td");
+      tdNet.innerHTML = op?.network ? `<span class="pill" style="font-size:11px;">${esc(op.network)}</span>` : "—";
+      tr.appendChild(tdNet);
+
+      const tdChain = document.createElement("td");
+      tdChain.innerHTML = r.resolvedChain ? `<span class="pill pill-ok" style="font-size:11px;">✓ ${esc(r.resolvedChain)}</span>` : `<span class="pill pill-muted" style="font-size:11px;">Not available</span>`;
+      tr.appendChild(tdChain);
+
+      const tdStatus = document.createElement("td");
+      tdStatus.innerHTML = `<span class="pill ${stateClass}" style="font-size:11px;">${esc(txStatus)}</span>`;
+      tr.appendChild(tdStatus);
+
+      const tdAct = document.createElement("td");
+      tdAct.className = "bulkActionsCell";
+
+      if (recommended?.supportsPreview){
+        const previewBtn = document.createElement("button");
+        previewBtn.className = "btn btn-sm";
+        previewBtn.textContent = "Preview";
+        previewBtn.addEventListener("click", () => showPreview(recommended));
+        tdAct.appendChild(previewBtn);
+      }
+
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "btn btn-sm";
+      copyBtn.textContent = "Summary";
+      copyBtn.addEventListener("click", async () => { await copyText(makeSupportSummary(r)); });
+      tdAct.appendChild(copyBtn);
+
+      if (recommended?.url){
+        const tabBtn = document.createElement("button");
+        tabBtn.className = "btn btn-sm";
+        tabBtn.textContent = "↗";
+        tabBtn.title = "Open details in a new tab";
+        tabBtn.addEventListener("click", () => window.open(recommended.url,"_blank","noreferrer"));
+        tdAct.appendChild(tabBtn);
+      }
+
+      tr.appendChild(tdAct);
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    container.appendChild(tableWrap);
+
+    $("summaryMeta").textContent = `${rows.length} item${rows.length!==1?"s":""} · ${nowStamp()}`;
+
+    // Save first item to history
+    if (rows[0]) saveHistory({...rows[0], summaryText:`BULK (${rows.length})`});
+
+  } finally {
+    $("gen").textContent = "View transaction";
+    $("gen").disabled = false;
+  }
+}
+
+/* ─── MODE ───────────────────────────────────────────────────── */
+let isBulk = false;
+function setMode(bulk){
+  isBulk = bulk;
+  $("bulk").style.display        = bulk?"block":"none";
+  $("q").style.display           = bulk?"none":"block";
+  $("network").parentElement?.style; // no-op
+  $("modeBtn").textContent       = bulk?"Single mode":"Bulk mode";
+  $("bulkResults").style.display = bulk?"block":"none";
+  $("mainGrid").style.display    = bulk?"none":"grid";
+
+  // Clear state
+  clearPreview();
+  $("outputList").innerHTML = "";
+  $("summaryBody").innerHTML = `<div class="emptyState"><div class="emptyStateIcon">⬡</div><div class="emptyStateText">No lookup yet</div><div class="emptyStateSub">Paste a value above and click View transaction</div></div>`;
+  $("classificationBadges").innerHTML = "";
+  $("agentHint").textContent = "";
+  $("summaryMeta").textContent = "";
+  $("bulkResults").innerHTML = "";
+  lastResult = null;
+
+  $("classificationBadges").innerHTML = bulk ? `<span class="pill pill-info">Bulk mode · up to 50 items</span>` : "";
+}
+
+/* ─── THEME ──────────────────────────────────────────────────── */
+function applyTheme(theme){
+  document.documentElement.setAttribute("data-theme",theme);
+  localStorage.setItem("ta_theme_v7",theme);
+}
+
+/* ─── GENERATE ENTRY POINT ───────────────────────────────────── */
+async function generate(){
+  if (isBulk) return generateBulk();
+  return generateSingle();
+}
+
+/* ─── BUTTONS ────────────────────────────────────────────────── */
+$("gen").addEventListener("click", generate);
+
+$("previewBest").addEventListener("click", async () => {
+  if (isBulk){ toast("Explorer preview is only available in single mode"); return; }
+  if (!lastResult) await generateSingle();
+  const best = lastResult?.outputs?.find(o=>o.isRecommended&&o.supportsPreview)||lastResult?.outputs?.find(o=>o.supportsPreview);
+  if (best) showPreview(best);
+  else toast("No previewable output found");
+});
+
+$("copyAll").addEventListener("click", async () => {
+  if (isBulk){ toast("Copy links is for single mode"); return; }
+  if (!lastResult) await generateSingle();
+  if (!lastResult?.outputs?.length) return;
+  const safeOutputs = lastResult.outputs.filter(o=>!o.isSecondary && !o.reasonDisabled);
+  const text = safeOutputs.map(o=>`${o.label}: ${o.url}`).join("\n");
+  await copyText(text);
+});
+
+$("copySummary").addEventListener("click", async () => {
+  if (isBulk){ toast("Use 'Summary' per row in bulk mode"); return; }
+  if (!lastResult && !$("q").value.trim()){ toast("Nothing to copy"); return; }
+  if (!lastResult) await generateSingle();
+  await copyText(makeSupportSummary(lastResult));
+});
+
+$("openAll").addEventListener("click", async () => {
+  if (isBulk){ toast("Open all is for single mode"); return; }
+  if (!lastResult) await generateSingle();
+  if (!lastResult?.outputs?.length) return;
+  const safeOutputs = lastResult.outputs.filter(o=>!o.isSecondary && !o.reasonDisabled);
+  const max = Math.min(4, safeOutputs.length);
+  for (let i=0;i<max;i++) window.open(safeOutputs[i].url,"_blank","noreferrer");
+  toast(`Opened ${max} tab${max!==1?"s":""}`);
+});
+
+$("openSameTab").addEventListener("click", async () => {
+  if (isBulk){ toast("Open details is only available in single mode"); return; }
+  if (!lastResult) await generateSingle();
+  const best = lastResult?.outputs?.find(o=>o.isRecommended)||lastResult?.outputs?.[0];
+  if (best) window.location.href = best.url;
+});
+
+$("openNewTab").addEventListener("click", () => { if(currentPreviewItem) window.open(currentPreviewItem.url,"_blank","noreferrer"); });
+$("copyUrl").addEventListener("click", async () => { if(currentPreviewItem) await copyText(currentPreviewItem.url); });
+$("clearPreview").addEventListener("click", clearPreview);
+
+$("clearHistory").addEventListener("click", () => {
+  localStorage.removeItem(HIST_KEY);
+  renderHistory();
+  toast("History cleared");
+});
+
+$("themeBtn").addEventListener("click", () => {
+  const cur = localStorage.getItem("ta_theme_v7")||"dark";
+  applyTheme(cur==="dark"?"light":"dark");
+});
+
+$("modeBtn").addEventListener("click", () => setMode(!isBulk));
+
+/* ─── KEYBOARD SHORTCUTS ─────────────────────────────────────── */
+document.addEventListener("keydown", async e => {
+  const mac = /mac/i.test(navigator.platform);
+  const cmd = mac?e.metaKey:e.ctrlKey;
+
+  if (e.key==="Enter" && !e.shiftKey && !cmd){
+    if (document.activeElement !== $("bulk")){ e.preventDefault(); await generate(); }
+    return;
+  }
+  if (e.key==="Enter" && cmd){
+    if (!isBulk){
+      e.preventDefault();
+      if (!lastResult) await generateSingle();
+      const best = lastResult?.outputs?.find(o=>o.isRecommended&&o.supportsPreview)||lastResult?.outputs?.find(o=>o.supportsPreview);
+      if (best) showPreview(best);
+    }
+    return;
+  }
+  if ((e.key==="C"||e.key==="c") && cmd && e.shiftKey){
+    if (!isBulk){ e.preventDefault(); if (!lastResult) await generateSingle(); await copyText(makeSupportSummary(lastResult)); }
+    return;
+  }
+  if (e.key==="Escape") clearPreview();
+});
+
+$("q").addEventListener("input", () => { if(!isBulk) updatePermalink($("q").value); });
+
+/* ─── INIT ───────────────────────────────────────────────────── */
+(function init(){
+  applyTheme(localStorage.getItem("ta_theme_v7")||"dark");
+  migrateHistory();
+  renderHistory();
+
+
+  const q = readPermalink();
+  if (q){ $("q").value = q; generateSingle(); }
+})();
+</script>
+</body>
+</html>
