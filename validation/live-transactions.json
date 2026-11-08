@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-11-08T14:11:00.725Z",
+  "heliusConfigured": false,
+  "reports": [
+    {
+      "network": "ethereum",
+      "passed": true,
+      "hash": "0x30e03da0a7c3ba33474b71bf31cff83205342dd8f119bfb6c15e6b58bcb8ea8a",
+      "status": "Confirmed"
+    },
+    {
+      "network": "polygon",
+      "passed": true,
+      "hash": "0x946226820723ed0242033cc1231020a4ebe02fda80c5f1d2167315efc5b4c87c",
+      "status": "Confirmed"
+    },
+    {
+      "network": "arbitrum",
+      "passed": true,
+      "hash": "0x7422af12887203b89287ba00535a9a158848d20514f738e8fb43a4483b4c6830",
+      "status": "Confirmed"
+    },
+    {
+      "network": "bitcoin",
+      "passed": true,
+      "hash": "742626be736b1d91511683ce7230657c3e7538b4f615470ef2134d9b7a0f8cc2",
+      "status": "Confirmed"
+    },
+    {
+      "network": "tron",
+      "passed": true,
+      "hash": "410e6c459b824104c688362c240ce68de897f896e3cbf6bde56bc6561e1af73e",
+      "status": "Pending"
+    },
+    {
+      "network": "solana",
+      "passed": true,
+      "hash": "ttPAc9uvg3Hbuf7Ffqz7j8CpvxTewnznJsdUmuHQTDikNoeVAJH1KzRnMkFgSULaR1yieLLwzTJF3wKsdH4d8As",
+      "status": "Confirmed"
+    }
+  ]
+}

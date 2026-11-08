@@ -1,0 +1,502 @@
+TAP version 13
+# Subtest: all frontend DOM references exist in published HTML
+ok 1 - all frontend DOM references exist in published HTML
+  ---
+  duration_ms: 3.537875
+  type: 'test'
+  ...
+# Subtest: frontend startup tolerates unavailable local storage
+ok 2 - frontend startup tolerates unavailable local storage
+  ---
+  duration_ms: 0.566083
+  type: 'test'
+  ...
+# Subtest: frontend handles corrupt history JSON
+ok 3 - frontend handles corrupt history JSON
+  ---
+  duration_ms: 0.71675
+  type: 'test'
+  ...
+# Subtest: scan renders actual summary, output chip and internal preview
+ok 4 - scan renders actual summary, output chip and internal preview
+  ---
+  duration_ms: 20.076333
+  type: 'test'
+  ...
+# Subtest: frontend calls only the same-origin API
+ok 5 - frontend calls only the same-origin API
+  ---
+  duration_ms: 1.253958
+  type: 'test'
+  ...
+# Subtest: HTTP outage appears and controls recover
+ok 6 - HTTP outage appears and controls recover
+  ---
+  duration_ms: 0.76875
+  type: 'test'
+  ...
+# Subtest: rate limit gives explicit retry instruction
+ok 7 - rate limit gives explicit retry instruction
+  ---
+  duration_ms: 0.435583
+  type: 'test'
+  ...
+# Subtest: network failure is handled without uncaught rejection
+ok 8 - network failure is handled without uncaught rejection
+  ---
+  duration_ms: 0.547833
+  type: 'test'
+  ...
+# Subtest: malformed backend response is handled
+ok 9 - malformed backend response is handled
+  ---
+  duration_ms: 1.288208
+  type: 'test'
+  ...
+# Subtest: not found state is visibly distinct
+ok 10 - not found state is visibly distinct
+  ---
+  duration_ms: 1.153
+  type: 'test'
+  ...
+# Subtest: editing input clears stale transaction and preview
+ok 11 - editing input clears stale transaction and preview
+  ---
+  duration_ms: 0.731458
+  type: 'test'
+  ...
+# Subtest: duplicate submission is suppressed
+ok 12 - duplicate submission is suppressed
+  ---
+  duration_ms: 0.68075
+  type: 'test'
+  ...
+# Subtest: edited input prevents old response from overwriting screen
+ok 13 - edited input prevents old response from overwriting screen
+  ---
+  duration_ms: 0.67575
+  type: 'test'
+  ...
+# Subtest: invoice is absent from history and permalink
+ok 14 - invoice is absent from history and permalink
+  ---
+  duration_ms: 0.84
+  type: 'test'
+  ...
+# Subtest: provider strings are HTML escaped in preview
+ok 15 - provider strings are HTML escaped in preview
+  ---
+  duration_ms: 0.429958
+  type: 'test'
+  ...
+# Subtest: support summary contains actual links
+ok 16 - support summary contains actual links
+  ---
+  duration_ms: 0.371041
+  type: 'test'
+  ...
+# Subtest: unsafe explorer URLs are rejected
+ok 17 - unsafe explorer URLs are rejected
+  ---
+  duration_ms: 0.507708
+  type: 'test'
+  ...
+# Subtest: bulk scan renders each item
+ok 18 - bulk scan renders each item
+  ---
+  duration_ms: 1.359334
+  type: 'test'
+  ...
+# Subtest: static page executes no inline scripts and preview has no script privileges
+ok 19 - static page executes no inline scripts and preview has no script privileges
+  ---
+  duration_ms: 0.217833
+  type: 'test'
+  ...
+# Subtest: bulk limits a request batch to twenty inputs
+ok 20 - bulk limits a request batch to twenty inputs
+  ---
+  duration_ms: 4.057542
+  type: 'test'
+  ...
+# Subtest: changing network invalidates the last result
+ok 21 - changing network invalidates the last result
+  ---
+  duration_ms: 0.618292
+  type: 'test'
+  ...
+# Subtest: API returns result and disables shared caching
+ok 22 - API returns result and disables shared caching
+  ---
+  duration_ms: 3.446375
+  type: 'test'
+  ...
+# Subtest: API rejects cross origin
+ok 23 - API rejects cross origin
+  ---
+  duration_ms: 0.454625
+  type: 'test'
+  ...
+# Subtest: API rejects non POST
+ok 24 - API rejects non POST
+  ---
+  duration_ms: 0.1525
+  type: 'test'
+  ...
+# Subtest: API rejects wrong content type
+ok 25 - API rejects wrong content type
+  ---
+  duration_ms: 0.201125
+  type: 'test'
+  ...
+# Subtest: API rejects oversized body
+ok 26 - API rejects oversized body
+  ---
+  duration_ms: 0.715833
+  type: 'test'
+  ...
+# Subtest: API rejects invalid JSON
+ok 27 - API rejects invalid JSON
+  ---
+  duration_ms: 0.5955
+  type: 'test'
+  ...
+# Subtest: API exposes only safe input errors
+ok 28 - API exposes only safe input errors
+  ---
+  duration_ms: 0.34225
+  type: 'test'
+  ...
+# Subtest: API redacts provider exception and credentials
+ok 29 - API redacts provider exception and credentials
+  ---
+  duration_ms: 0.256791
+  type: 'test'
+  ...
+# Subtest: API overload is retryable
+ok 30 - API overload is retryable
+  ---
+  duration_ms: 0.991584
+  type: 'test'
+  ...
+# Subtest: production ingress rate limit configured
+ok 31 - production ingress rate limit configured
+  ---
+  duration_ms: 0.268167
+  type: 'test'
+  ...
+# Subtest: transport preserves RPC null vs JSON RPC error
+ok 32 - transport preserves RPC null vs JSON RPC error
+  ---
+  duration_ms: 0.755959
+  type: 'test'
+  ...
+# Subtest: transport respects rate limit cooldown without retry storm
+ok 33 - transport respects rate limit cooldown without retry storm
+  ---
+  duration_ms: 0.578667
+  type: 'test'
+  ...
+# Subtest: transport rejects malformed JSON
+ok 34 - transport rejects malformed JSON
+  ---
+  duration_ms: 0.286959
+  type: 'test'
+  ...
+# Subtest: transport deadline includes response body parsing
+ok 35 - transport deadline includes response body parsing
+  ---
+  duration_ms: 78.418542
+  type: 'test'
+  ...
+# Subtest: ethereum transaction resolves by hash
+ok 36 - ethereum transaction resolves by hash
+  ---
+  duration_ms: 5.875125
+  type: 'test'
+  ...
+# Subtest: polygon transaction resolves by hash
+ok 37 - polygon transaction resolves by hash
+  ---
+  duration_ms: 0.764084
+  type: 'test'
+  ...
+# Subtest: arbitrum transaction resolves by hash
+ok 38 - arbitrum transaction resolves by hash
+  ---
+  duration_ms: 1.141125
+  type: 'test'
+  ...
+# Subtest: all EVM chains start concurrently
+ok 39 - all EVM chains start concurrently
+  ---
+  duration_ms: 1.434792
+  type: 'test'
+  ...
+# Subtest: failed EVM execution is never confirmed
+ok 40 - failed EVM execution is never confirmed
+  ---
+  duration_ms: 0.431125
+  type: 'test'
+  ...
+# Subtest: pending EVM transaction is preserved
+ok 41 - pending EVM transaction is preserved
+  ---
+  duration_ms: 0.299583
+  type: 'test'
+  ...
+# Subtest: included transaction with missing receipt is partial, not pending
+ok 42 - included transaction with missing receipt is partial, not pending
+  ---
+  duration_ms: 0.425334
+  type: 'test'
+  ...
+# Subtest: wrong chain endpoint is never trusted
+ok 43 - wrong chain endpoint is never trusted
+  ---
+  duration_ms: 0.41225
+  type: 'test'
+  ...
+# Subtest: mismatched returned hash is never trusted
+ok 44 - mismatched returned hash is never trusted
+  ---
+  duration_ms: 0.599375
+  type: 'test'
+  ...
+# Subtest: first provider outage fails over
+ok 45 - first provider outage fails over
+  ---
+  duration_ms: 0.771167
+  type: 'test'
+  ...
+# Subtest: no transaction differs from outage
+ok 46 - no transaction differs from outage
+  ---
+  duration_ms: 0.412708
+  type: 'test'
+  ...
+# Subtest: partial scan outage is never called not found
+ok 47 - partial scan outage is never called not found
+  ---
+  duration_ms: 0.37325
+  type: 'test'
+  ...
+# Subtest: multiple chain matches are retained
+ok 48 - multiple chain matches are retained
+  ---
+  duration_ms: 0.439792
+  type: 'test'
+  ...
+# Subtest: raw hex EVM hash is found without 0x
+ok 49 - raw hex EVM hash is found without 0x
+  ---
+  duration_ms: 0.519042
+  type: 'test'
+  ...
+# Subtest: unrecognized raw hex never defaults to Tron
+ok 50 - unrecognized raw hex never defaults to Tron
+  ---
+  duration_ms: 0.223708
+  type: 'test'
+  ...
+# Subtest: explicit chain only queries selected chain
+ok 51 - explicit chain only queries selected chain
+  ---
+  duration_ms: 0.194083
+  type: 'test'
+  ...
+# Subtest: known explorer URL selects the exact network
+ok 52 - known explorer URL selects the exact network
+  ---
+  duration_ms: 0.404875
+  type: 'test'
+  ...
+# Subtest: EVM address returns balances on all networks
+ok 53 - EVM address returns balances on all networks
+  ---
+  duration_ms: 0.737916
+  type: 'test'
+  ...
+# Subtest: ERC20 exact units and contract are shown
+ok 54 - ERC20 exact units and contract are shown
+  ---
+  duration_ms: 9.662125
+  type: 'test'
+  ...
+# Subtest: missing ERC20 metadata retains raw base units
+ok 55 - missing ERC20 metadata retains raw base units
+  ---
+  duration_ms: 4.855875
+  type: 'test'
+  ...
+# Subtest: Bitcoin summary totals include change warning
+ok 56 - Bitcoin summary totals include change warning
+  ---
+  duration_ms: 0.323541
+  type: 'test'
+  ...
+# Subtest: Tron failed execution does not become confirmed
+ok 57 - Tron failed execution does not become confirmed
+  ---
+  duration_ms: 0.097416
+  type: 'test'
+  ...
+# Subtest: Tron zero-decimal token stays exact
+ok 58 - Tron zero-decimal token stays exact
+  ---
+  duration_ms: 0.157083
+  type: 'test'
+  ...
+# Subtest: Solana address is distinguished from signature
+ok 59 - Solana address is distinguished from signature
+  ---
+  duration_ms: 1.1945
+  type: 'test'
+  ...
+# Subtest: Solana signature status survives unavailable details
+ok 60 - Solana signature status survives unavailable details
+  ---
+  duration_ms: 0.180292
+  type: 'test'
+  ...
+# Subtest: Solana parsed failed transaction
+ok 61 - Solana parsed failed transaction
+  ---
+  duration_ms: 0.13475
+  type: 'test'
+  ...
+# Subtest: Solana wrong genesis is unavailable
+ok 62 - Solana wrong genesis is unavailable
+  ---
+  duration_ms: 0.111125
+  type: 'test'
+  ...
+# Subtest: Helius key stays server side
+ok 63 - Helius key stays server side
+  ---
+  duration_ms: 0.117959
+  type: 'test'
+  ...
+# Subtest: concurrent identical requests coalesce and cache
+ok 64 - concurrent identical requests coalesce and cache
+  ---
+  duration_ms: 0.222959
+  type: 'test'
+  ...
+# Subtest: cache expires
+ok 65 - cache expires
+  ---
+  duration_ms: 0.457708
+  type: 'test'
+  ...
+# Subtest: invalid lightning invoice rejected
+ok 66 - invalid lightning invoice rejected
+  ---
+  duration_ms: 0.5395
+  type: 'test'
+  ...
+# Subtest: valid invoice decoded with settlement explicitly unknown
+ok 67 - valid invoice decoded with settlement explicitly unknown
+  ---
+  duration_ms: 3.988542
+  type: 'test'
+  ...
+# Subtest: reject invalid input hello auto
+ok 68 - reject invalid input hello auto
+  ---
+  duration_ms: 0.077292
+  type: 'test'
+  ...
+# Subtest: reject invalid input https://etherscan.io.evil.com/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+ok 69 - reject invalid input https://etherscan.io.evil.com/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+  ---
+  duration_ms: 0.062458
+  type: 'test'
+  ...
+# Subtest: reject invalid input https://sepolia.etherscan.io/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+ok 70 - reject invalid input https://sepolia.etherscan.io/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+  ---
+  duration_ms: 0.083708
+  type: 'test'
+  ...
+# Subtest: reject invalid input https://etherscan.io/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa solana
+ok 71 - reject invalid input https://etherscan.io/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa solana
+  ---
+  duration_ms: 0.108208
+  type: 'test'
+  ...
+# Subtest: reject invalid input 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bitcoin
+ok 72 - reject invalid input 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bitcoin
+  ---
+  duration_ms: 0.030375
+  type: 'test'
+  ...
+# Subtest: reject invalid input https://solscan.io/tx/4ReKprwf3WdLHRrzp4ctPWNBsQDPL3VZz3zMmoZfcGJ auto
+ok 73 - reject invalid input https://solscan.io/tx/4ReKprwf3WdLHRrzp4ctPWNBsQDPL3VZz3zMmoZfcGJ auto
+  ---
+  duration_ms: 0.057417
+  type: 'test'
+  ...
+# Subtest: reject invalid input aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+ok 74 - reject invalid input aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+  ---
+  duration_ms: 0.036958
+  type: 'test'
+  ...
+# Subtest: reject invalid input [object Object] auto
+ok 75 - reject invalid input [object Object] auto
+  ---
+  duration_ms: 0.081791
+  type: 'test'
+  ...
+# Subtest: reject invalid input 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa unknown
+ok 76 - reject invalid input 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa unknown
+  ---
+  duration_ms: 0.02725
+  type: 'test'
+  ...
+# Subtest: reject invalid input https://mempool.space/testnet/tx/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+ok 77 - reject invalid input https://mempool.space/testnet/tx/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa auto
+  ---
+  duration_ms: 0.031875
+  type: 'test'
+  ...
+# Subtest: Bitcoin address requires a valid checksum
+ok 78 - Bitcoin address requires a valid checksum
+  ---
+  duration_ms: 0.726167
+  type: 'test'
+  ...
+# Subtest: Tron address requires a valid checksum
+ok 79 - Tron address requires a valid checksum
+  ---
+  duration_ms: 0.305291
+  type: 'test'
+  ...
+# Subtest: Solana mainnet verification uses the complete genesis hash
+ok 80 - Solana mainnet verification uses the complete genesis hash
+  ---
+  duration_ms: 0.340875
+  type: 'test'
+  ...
+# Subtest: unsafe JSON numeric balances are rejected instead of rounded
+ok 81 - unsafe JSON numeric balances are rejected instead of rounded
+  ---
+  duration_ms: 0.324625
+  type: 'test'
+  ...
+# Subtest: a lookup deadline stops all provider probes
+ok 82 - a lookup deadline stops all provider probes
+  ---
+  duration_ms: 27.274583
+  type: 'test'
+  ...
+1..82
+# tests 82
+# suites 0
+# pass 82
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1223.915083

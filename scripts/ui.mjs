@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
+const {chromium} = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const server=spawn(process.execPath,['scripts/serve.mjs'],{stdio:['ignore','pipe','inherit']});
+await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(Error('Server did not start')));});
+let browser;
+try {
+ browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})});
+ const context=await browser.newContext();const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('https://fonts.**/*',route=>route.abort());
+ const hash='0x'+'a'.repeat(64);
+ const sample=()=>{
+  const op={summaryState:'RICH',network:'Polygon',chainId:'polygon',resolvedChain:'polygon',entityType:'tx',rawId:hash,fields:[{key:'Status',value:'Confirmed',valueType:'status'},{key:'Native value',value:'0.000000000000000001 POL',valueType:'amount'},{key:'Token transfer 1',value:'10.000001 USDT (token-reported metadata)',valueType:'amount'}],explorerBest:'https://polygonscan.com/tx/'+hash,fetchedAt:new Date().toISOString()};
+  return {schemaVersion:2,resolvedInput:hash,resolvedChain:'polygon',onePage:op,outputs:[{typeId:'polygon_tx',rawId:hash,label:'Polygon summary',shortLabel:'Polygon',url:op.explorerBest,network:'Polygon',chainId:'polygon',entityType:'tx',supportsPreview:true,isRecommended:true,resolvedChain:'polygon',previewStrategy:'SRCDOC_STATIC',summaryData:op}]};
+ };
+ let response=sample(),status=200,delay=0,requests=0;
+ await page.route('**/api/lookup',async route=>{requests++;if(delay)await new Promise(r=>setTimeout(r,delay));await route.fulfill({status,contentType:'application/json',body:JSON.stringify(response)});});
+ const scan=async(input=hash)=>{await page.locator('#q').fill(input);await page.locator('#gen').click();await page.waitForFunction(()=>!document.getElementById('gen').disabled);};
+ let passed=0;const check=(name,condition)=>{assert.ok(condition,name);passed++;console.log('PASS '+name);};
+ await page.goto('http://127.0.0.1:8787');
+ check('startup has no runtime errors',errors.length===0);
+ check('logo asset is published',await page.locator('.logo img').evaluate(e=>e.complete&&e.naturalWidth>0));
+ await scan();check('token and tiny native amounts appear',(await page.locator('#summaryBody').innerText()).includes('10.000001 USDT') && (await page.locator('#summaryBody').innerText()).includes('0.000000000000000001 POL'));
+ check('output chip renders',await page.locator('.outputChip').count()===1);
+ check('internal preview contains token amount',(await page.frameLocator('#viewer').locator('body').innerText()).includes('10.000001 USDT'));
+ check('preview scripts disabled',!(await page.locator('#viewer').getAttribute('sandbox')).includes('allow-scripts'));
+ await page.locator('#q').fill('0x'+'b'.repeat(64));check('editing clears stale summary',!(await page.locator('#summaryBody').innerText()).includes('10.000001 USDT'));
+ response={...sample(),resolvedChain:null,outputs:[],onePage:{summaryState:'NOT_FOUND',network:'Supported mainnets',fields:[{key:'Status',value:'Not found',valueType:'status'}]}};
+ await scan();check('not found shown',(await page.locator('#summaryBody').innerText()).includes('Not found'));
+ status=503;response={error:'Scanner temporarily unavailable.'};await scan();check('HTTP outage shown and controls recover',(await page.locator('#summaryBody').innerText()).includes('Scanner temporarily unavailable.') && await page.locator('#gen').isEnabled());
+ status=429;await scan();check('rate limit explains retry',(await page.locator('#summaryBody').innerText()).includes('Wait a minute'));
+ status=200;response=sample();response.onePage.fields.push({key:'Description',value:'<img src=x onerror="window.injected=true">',valueType:'text'});await scan();check('provider text escaped',await page.locator('#summaryBody img').count()===0 && await page.evaluate(()=>!window.injected));
+ delay=180;const prior=requests;await page.locator('#q').fill(hash);await page.locator('#q').press('Enter');await page.locator('#q').press('Enter');await page.waitForFunction(()=>!document.getElementById('gen').disabled);check('duplicate submits suppressed',requests===prior+1);
+ delay=0;response=sample();await page.locator('#themeBtn').click();check('theme toggles',await page.locator('html').getAttribute('data-theme')==='light');
+ await page.setViewportSize({width:390,height:844});check('mobile fits viewport',await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+ await page.setViewportSize({width:1280,height:900});await scan();await mkdir('work',{recursive:true});await page.screenshot({path:'work/desktop.png',fullPage:true});
+ await page.locator('#modeBtn').click();await page.locator('#bulk').fill(hash+'\n'+hash);await page.locator('#gen').click();await page.waitForFunction(()=>!document.getElementById('gen').disabled);check('bulk renders every input',await page.locator('.bulkTable tbody tr').count()===2);
+ await page.locator('#modeBtn').click();await page.evaluate(()=>localStorage.setItem('ta_lookup_history_v8','broken json'));await page.reload();check('corrupt history safe',await page.locator('#gen').isEnabled());
+ response={resolvedInput:'lnbc1test',resolvedChain:null,onePage:{summaryState:'LIMITED',network:'Lightning',entityType:'invoice',fields:[{key:'Status',value:'Invoice decoded; payment status unknown',valueType:'status'}]},outputs:[]};await scan('lnbc1test');
+ check('invoice absent from permalink',!page.url().includes('lnbc1test'));check('invoice absent from history',!(await page.evaluate(()=>localStorage.getItem('ta_lookup_history_v8')))?.includes('lnbc1test'));
+ check('no runtime errors after interactions',errors.length===0);console.log(`${passed} UI checks passed.`);
+} finally {await browser?.close();server.kill();}

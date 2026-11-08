@@ -1,0 +1,9 @@
+PASS: npm run check
+Syntax checks for source JavaScript
+Frontend provider/secret boundary checks
+Script-free preview check
+Production function ES module bundle
+Production function import with real dependencies
+
+PASS: clean npm ci with locked package versions and integrity-checked cached tarballs
+Node.js 22.23.4, npm 10.9.9
