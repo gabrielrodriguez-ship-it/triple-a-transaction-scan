@@ -1,10 +1,14 @@
-# Triple-A Scan revamp
+# Triple-A Scan
 
 Read-only transaction inspection for Ethereum, Polygon, Arbitrum One, Bitcoin, Tron, Solana mainnet, and BOLT11 Lightning invoices. Results stay in Triple-A; explorer links are optional.
 
-**Validation status:** the automated tests, production function bundle/import, and live transaction lookups on all six on-chain networks pass. Real-browser checks were blocked by local permissions. Helius-key integration and a Netlify deploy preview remain unverified. See [VALIDATION.md](VALIDATION.md). This revision has not been pushed or deployed.
+**Validation status:** 106 automated tests and the production function build/import check passed on 8 November 2026. The deployed receipt update was checked against the previously failing Ethereum transaction and a Tron overview URL; both returned confirmed summaries. The Solana token-label update still needs deployment and a live recheck. Browser checks, Helius-key integration, and production capacity remain unverified. See [VALIDATION.md](VALIDATION.md).
 
-## What changed
+## Interface
+
+The search form uses labeled transaction and network fields. During a lookup, the Triple-A mark animates while old results are hidden. Bulk progress counts completed requests. Loading clears after success, failure, or an input change, and animation stops for visitors who request reduced motion. The loading state does not add an artificial delay.
+
+## How it works
 
 - The frontend calls only `POST /api/lookup`. Provider requests and credentials stay in the Netlify function.
 - EVM chains are checked concurrently, with provider fallback and chain-ID verification. A returned transaction hash must match the input. Unprefixed 64-character hex hashes are checked across all three EVM chains, Bitcoin, and Tron, with no default to Tron.
@@ -62,7 +66,7 @@ Official references: [Netlify function environment variables](https://docs.netli
 
 Netlify ingress is configured for 30 requests per 60 seconds per IP/domain combination. Confirm this rule is supported and active on the deployed Netlify plan. Platform 429s are handled even if the platform returns HTML rather than JSON.
 
-Each provider request has a 2.8-second timeout, including body loading. A lookup has a 20-second deadline; the frontend allows 25 seconds. Providers with HTTP 429 enter a bounded Retry-After cooldown; another configured provider is tried without hammering the throttled endpoint. Eight concurrent requests per provider host and 24 distinct active lookups are allowed per warm instance. Identical requests coalesce; results are cached for 2–15 seconds in a bounded in-memory cache. Bulk mode accepts the first 20 lines and announces truncation.
+Each provider request has a 2.8-second timeout, including body loading. A lookup has a 20-second deadline; the frontend allows 25 seconds. Providers with HTTP 429 or recognized JSON-RPC quota errors enter a bounded Retry-After cooldown; another configured provider is tried without hammering the throttled endpoint. Eight concurrent requests per provider host and 24 distinct active lookups are allowed per warm instance. Identical requests coalesce; results are cached for 2–15 seconds in a bounded in-memory cache. Bulk mode accepts the first 20 lines and announces truncation.
 
 Warm-instance limits, cooldowns, and cache are **not fleet-wide quota enforcement**. Public RPCs and free keys do not provide a production availability guarantee. Use dedicated providers with appropriate quotas for production traffic. A shared limiter/gateway is required if Infra must enforce a single provider-key quota across function instances. No guarantee is made that a particular free Helius plan permits 10 requests/second; use the current account quota.
 
@@ -72,6 +76,6 @@ A transaction hash does not encode an EVM network. Coverage is limited to the li
 
 Receipt inclusion is not finality or merchant settlement. The app displays confirmations when available. Execution fees may not include every chain-specific component. Standard transfer logs are shown up to 12 entries; internal EVM transfers, complete token balances/history, NFTs, and every contract interaction are not indexed. Token symbols can be spoofed: verify the contract/mint. Failed transaction transfer records do not indicate funds settled.
 
-Bitcoin output totals include change and are not a payment amount. Solana parsed instructions can refer to token accounts. Lightning settlement must come from the Triple-A payment record. Bitcoin/Tron addresses are recognized but address history is not indexed.
+Bitcoin output totals include change and are not a payment amount. Solana parsed instructions can refer to token accounts. Checked transfers display USDC or USDT only when the mint matches the issuer-listed mainnet address and the decimals match. Other tokens retain an explicit unknown-symbol label; unchecked SPL transfers may show base units. Lightning settlement must come from the Triple-A payment record. Bitcoin/Tron addresses are recognized but address history is not indexed.
 
 History stores up to 30 prior non-invoice lookups locally; selecting an entry fetches fresh data. Clear history using the page control. Permalinks contain transaction inputs; invoices are excluded.

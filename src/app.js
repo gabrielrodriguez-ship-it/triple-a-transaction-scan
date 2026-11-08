@@ -661,13 +661,27 @@ async function copyText(t){ try{ await navigator.clipboard.writeText(t); toast("
 /* ─── SINGLE MODE ────────────────────────────────────────────── */
 let lastResult = null;
 
+function setLookupBusy(busy, title = 'Finding your transaction', detail = 'Checking the selected network for transaction details.'){
+  $('lookupStatus').hidden = !busy;
+  $('lookupTitle').textContent = title;
+  $('lookupDetail').textContent = detail;
+  document.documentElement.setAttribute('data-scanning', String(busy));
+  $('mainGrid').setAttribute('aria-busy', String(busy));
+  $('bulkResults').setAttribute('aria-busy', String(busy));
+  $('mainGrid').style.display = busy || isBulk ? 'none' : 'grid';
+  $('bulkResults').style.display = !busy && isBulk ? 'block' : 'none';
+  for(const id of ['copySummary','copyAll','openAll','openSameTab','previewBest']) $(id).disabled = busy;
+}
+
 let lookupEpoch=0;
 async function generateSingle(){
   if($("gen").disabled)return;
   const epoch=++lookupEpoch;
   const raw = $("q").value;
   const forced = $("network").value;
-  $("gen").textContent = "Scanning mainnets…";
+  invalidateResult();
+  setLookupBusy(true);
+  $("gen").textContent = "Searching…";
   $("gen").disabled = true;
 
   // Important: clear the previous preview before starting a new lookup.
@@ -692,6 +706,7 @@ async function generateSingle(){
     const best = result.outputs.find(o=>o.isRecommended&&o.supportsPreview) || result.outputs.find(o=>o.supportsPreview);
     if (best) await showPreview(best);
   } finally {
+    setLookupBusy(false);
     $("gen").textContent = "View transaction";
     $("gen").disabled = false;
   }
@@ -710,7 +725,10 @@ async function generateBulk(){
     return;
   }
 
-  $("gen").textContent = "Generating…";
+  invalidateResult();
+  $("bulkResults").innerHTML = "";
+  setLookupBusy(true, "Checking your transactions", `0 of ${Math.min(lines.length,20)} checked`);
+  $("gen").textContent = "Searching…";
   $("gen").disabled = true;
 
   try{
@@ -721,7 +739,8 @@ async function generateBulk(){
       const r = await buildLookupResult(line, forced);
       if(epoch!==lookupEpoch)return;
       rows.push(r);
-      $("gen").textContent = `Scanned ${rows.length}/${Math.min(lines.length,20)}`;
+      $("gen").textContent = `Checked ${rows.length}/${Math.min(lines.length,20)}`;
+      $("lookupDetail").textContent = `${rows.length} of ${Math.min(lines.length,20)} checked`;
     }
 
     // Render bulk table
@@ -808,6 +827,7 @@ async function generateBulk(){
     if (rows[0]) saveHistory({...rows[0], summaryText:`BULK (${rows.length})`});
 
   } finally {
+    setLookupBusy(false);
     $("gen").textContent = "View transaction";
     $("gen").disabled = false;
   }
@@ -937,7 +957,7 @@ document.addEventListener("keydown", async e => {
   if (e.key==="Escape") clearPreview();
 });
 
-function invalidateResult(){ lastResult=null; clearPreview(); renderOutputs([]); renderSummaryPanel(null); $('classificationBadges').innerHTML=''; $('agentHint').textContent=''; }
+function invalidateResult(){ setLookupBusy(false); lastResult=null; clearPreview(); renderOutputs([]); renderSummaryPanel(null); $('classificationBadges').innerHTML=''; $('agentHint').textContent=''; }
 $('q').addEventListener('input',()=>{lookupEpoch++;invalidateResult();updatePermalink('');});
 $('network').addEventListener('change',()=>{lookupEpoch++;invalidateResult();});
 

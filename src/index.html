@@ -765,6 +765,52 @@
       .btnRow { gap: 6px; }
       .outputChip { flex-wrap: wrap; }
     }
+
+    /* Lookup form and loading state */
+    .header { box-shadow: none; }
+    .headerInner { padding: 24px; }
+    .titleBlock h1 { font-size: 21px; letter-spacing: -.5px; }
+    .titleBlock .sub { opacity: 1; font-size: 13px; margin-top: 5px; }
+    .panelBody { padding: 24px; }
+    .inputRow { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 14px; align-items: end; }
+    .inputWrap { min-width: 0; }
+    .fieldLabel { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 600; color: var(--fg2); }
+    .networkField { min-width: 0; }
+    .inputHelp { color: var(--fg2); font-size: 12px; margin: 10px 0 18px; }
+    input, select { min-height: 48px; }
+    input { font-family: var(--font-mono); font-size: 12px; }
+    select { min-width: 0; }
+    .btn-primary { background: #f24c25; border-color: #f24c25; }
+    .btn-primary:hover { background: #da3d18; border-color: #da3d18; }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .btn:disabled { opacity: .55; cursor: wait; }
+    .cardTitle { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; }
+    .scanStatus { display: flex; align-items: center; gap: 22px; padding: 28px; margin-top: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card2); min-height: 150px; }
+    .scanStatus[hidden] { display: none; }
+    .scanMark { position: relative; width: 76px; height: 76px; flex-shrink: 0; display: grid; place-items: center; }
+    .scanMark::before { content: ''; position: absolute; inset: 0; border: 2px solid var(--border); border-top-color: var(--accent); border-right-color: var(--accent); border-radius: 50%; animation: scanOrbit 1.8s linear infinite; }
+    .scanMark img { width: 46px; height: 46px; border-radius: 13px; animation: scanFloat 1.8s ease-in-out infinite; }
+    .scanEyebrow { color: var(--accent); font-size: 11px; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; }
+    .scanTitle { font-size: 18px; font-weight: 600; letter-spacing: -.3px; margin: 4px 0; }
+    .scanDetail { font-size: 13px; color: var(--fg2); max-width: 48ch; }
+    @keyframes scanOrbit { to { transform: rotate(360deg); } }
+    @keyframes scanFloat { 0%,100% { transform: translateY(2px) rotate(-3deg); } 50% { transform: translateY(-4px) rotate(3deg); } }
+    [data-scanning="true"] .logo img { animation: scanFloat 1.8s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .scanMark::before, .scanMark img, [data-scanning="true"] .logo img { animation: none; }
+    }
+    @media (max-width: 640px) {
+      .inputRow { grid-template-columns: minmax(0, 1fr); }
+      .panelBody, .headerInner { padding: 18px; }
+      .headerActions { justify-content: flex-start; }
+      .shortcutsHint { display: none; }
+      .scanStatus { padding: 22px 16px; gap: 16px; }
+      .scanTitle { font-size: 16px; }
+      .scanMark { width: 60px; height: 60px; }
+      .scanMark img { width: 38px; height: 38px; }
+      .titleBlock h1 { font-size: 19px; }
+    }
   </style>
 </head>
 
@@ -781,7 +827,7 @@
           </div>
           <div class="titleBlock">
             <h1>Triple-A Scan</h1>
-            <div class="sub">Read-only transaction details across supported mainnets</div>
+            <div class="sub">Your transactions, one clear view.</div>
           </div>
         </div>
         <div class="headerActions">
@@ -798,8 +844,10 @@
     <div class="panelBody">
       <div class="inputRow">
         <div class="inputWrap">
-          <input id="q" aria-label="Transaction hash, address, or invoice" maxlength="12000" placeholder="Paste tx hash, address, explorer URL or LN invoice (lnbc…, 0x…, T…, bc1…)…" />
+          <label class="fieldLabel" for="q">Transaction</label>
+          <input id="q" aria-label="Transaction hash, address, or invoice" maxlength="12000" placeholder="Paste a transaction hash or explorer link" aria-describedby="inputHelp" />
         </div>
+        <div class="networkField"><label class="fieldLabel" for="network">Network</label>
         <select id="network" aria-label="Network">
           <option value="auto" selected>Auto-detect</option>
           <option value="bitcoin">Bitcoin</option>
@@ -808,8 +856,9 @@
           <option value="tron">Tron (TRC-20)</option>
           <option value="solana">Solana</option>
           <option value="lightning">Lightning</option>
-        </select>
+        </select></div>
       </div>
+      <p class="inputHelp" id="inputHelp">Search Ethereum, Polygon, Arbitrum, Bitcoin, Tron or Solana. Lightning invoices work too.</p>
 
       <textarea id="bulk" placeholder="Bulk mode — one tx hash / address / URL per line (max 20)"></textarea>
 
@@ -832,13 +881,21 @@
         <div id="agentHint" class="agentHint"></div>
       </div>
 
+      <div class="scanStatus" id="lookupStatus" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <div class="scanMark" aria-hidden="true"><img src="/assets/logo.png" alt="" /></div>
+        <div><div class="scanEyebrow">Triple-A Scan</div>
+          <div class="scanTitle" id="lookupTitle">Finding your transaction</div>
+          <div class="scanDetail" id="lookupDetail">Checking the selected network for transaction details.</div>
+        </div>
+      </div>
+
       <!-- ═══ MAIN GRID ═════════════════════════════════════ -->
       <div class="mainGrid" id="mainGrid">
 
         <!-- Summary card -->
         <div class="card" id="summaryCard">
           <div class="cardHead">
-            <span class="cardTitle">One-page summary</span>
+            <span class="cardTitle">Transaction details</span>
             <span class="cardMeta" id="summaryMeta"></span>
           </div>
           <div class="cardBody" id="summaryBody" aria-live="polite">
@@ -853,8 +910,8 @@
         <!-- Links / Viewer card -->
         <div class="card" id="linksCard">
           <div class="cardHead">
-            <span class="cardTitle">Explorer links</span>
-            <span class="cardMeta" id="linksCardMeta">Click a result to open Transaction preview</span>
+            <span class="cardTitle">Network &amp; explorer</span>
+            <span class="cardMeta" id="linksCardMeta">Preview details here or open the explorer</span>
           </div>
           <div class="cardBody">
             <div id="outputList" class="outputList"></div>

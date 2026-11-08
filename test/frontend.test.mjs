@@ -50,3 +50,45 @@ test('bulk scan renders each item',async()=>{const h=harness();h.ids.get('bulk')
 test('static page executes no inline scripts and preview has no script privileges',()=>{assert.ok(!html.includes('allow-scripts'));assert.match(html,/<script src="\/app.js" defer><\/script>/);assert.ok(!html.includes('onerror='));});
 test('bulk limits a request batch to twenty inputs',async()=>{const h=harness();h.ids.get('bulk').value=Array(21).fill(hash).join('\n');await h.run('generateBulk()');assert.equal(h.calls.filter(c=>c.opts).length,20);});
 test('changing network invalidates the last result',async()=>{const h=harness();h.ids.get('q').value=hash;await h.run('generateSingle()');h.ids.get('network').events.change[0]();assert.equal(h.run('lastResult'),null);assert.equal(h.ids.get('viewerWrap').style.display,'none');});
+
+test('pending lookup shows loader, hides old results and disables result actions',async()=>{
+ let resolve;const h=harness({fetcher:()=>new Promise(r=>resolve=r)});h.ids.get('q').value=hash;
+ const pending=h.run('generateSingle()');
+ assert.equal(h.ids.get('lookupStatus').hidden,false);
+ assert.equal(h.ids.get('mainGrid').getAttribute('aria-busy'),'true');
+ assert.equal(h.ids.get('mainGrid').style.display,'none');
+ assert.equal(h.ids.get('copySummary').disabled,true);
+ resolve(Response.json(sample()));await pending;
+ assert.equal(h.ids.get('lookupStatus').hidden,true);
+ assert.equal(h.ids.get('mainGrid').getAttribute('aria-busy'),'false');
+ assert.equal(h.ids.get('mainGrid').style.display,'grid');
+ assert.equal(h.ids.get('copySummary').disabled,false);
+ assert.match(h.ids.get('summaryBody').textContent,/10.000001 USDT/);
+});
+test('failed lookup clears loader and restores usable controls',async()=>{
+ const h=harness({fetcher:async()=>{throw Error('offline');}});h.ids.get('q').value=hash;await h.run('generateSingle()');
+ assert.equal(h.ids.get('lookupStatus').hidden,true);
+ assert.equal(h.ids.get('gen').disabled,false);
+ assert.equal(h.ids.get('mainGrid').style.display,'grid');
+ assert.match(h.ids.get('summaryBody').textContent,/unreachable/);
+});
+test('editing a pending lookup clears loader and rejects its stale result',async()=>{
+ let resolve;const h=harness({fetcher:()=>new Promise(r=>resolve=r)});h.ids.get('q').value=hash;
+ const pending=h.run('generateSingle()');h.ids.get('q').events.input[0]();
+ assert.equal(h.ids.get('lookupStatus').hidden,true);
+ resolve(Response.json(sample()));await pending;
+ assert.equal(h.run('lastResult'),null);assert.equal(h.ids.get('lookupStatus').hidden,true);
+});
+test('bulk progress counts completed responses and clears when finished',async()=>{
+ const resolvers=[];const h=harness({fetcher:()=>new Promise(r=>resolvers.push(r))});
+ h.run('setMode(true)');h.ids.get('bulk').value=hash+'\n'+hash;
+ const pending=h.run('generateBulk()');assert.equal(h.ids.get('lookupDetail').textContent,'0 of 2 checked');
+ resolvers[0](Response.json(sample()));
+ // Let JSON body parsing and the next lookup reach the mocked fetch.
+ for(let n=0;n<30 && resolvers.length<2;n++)await new Promise(r=>setImmediate(r));
+ assert.equal(resolvers.length,2);assert.equal(h.ids.get('lookupDetail').textContent,'1 of 2 checked');
+ resolvers[1](Response.json(sample()));await pending;
+ assert.equal(h.ids.get('lookupStatus').hidden,true);
+ assert.equal(h.ids.get('bulkResults').style.display,'block');assert.equal(h.ids.get('mainGrid').style.display,'none');
+ assert.match(h.ids.get('bulkResults').textContent,/2 items/);
+});
