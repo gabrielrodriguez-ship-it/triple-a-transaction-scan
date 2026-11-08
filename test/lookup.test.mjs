@@ -10,7 +10,7 @@ const signature='4ReKprwf3WdLHRrzp4ctPWNBsQDPL3VZz3zMmoZfcGJMJCHh5Vq937mPdyxhCbw
 const field=(r,k)=>r.onePage.fields.find(f=>f.key===k)?.value;
 function fixture(options={}) {
  const calls=[];
- const chainFor=url=>url.includes('polygon')?'polygon':url.includes('arbitrum')||url.includes('arb1.')?'arbitrum':'ethereum';
+ const chainFor=url=>Object.entries(CHAINS).find(([,c])=>c.rpc?.includes(url))?.[0] || (url.includes('polygon')?'polygon':url.includes('arbitrum')||url.includes('arb1.')?'arbitrum':'ethereum');
  const transport={
  async rpc(url,method,params) {
   const chain=chainFor(url); calls.push({chain,method,url,params});
@@ -47,7 +47,7 @@ test('pending EVM transaction is preserved',async()=>{const {service}=fixture({p
 test('included transaction with missing receipt is partial, not pending',async()=>{const {service}=fixture({noReceipt:true});const r=await service.lookup(hash);assert.equal(r.onePage.summaryState,'LIMITED');assert.match(field(r,'Status'),/receipt unavailable/);});
 test('wrong chain endpoint is never trusted',async()=>{const {service}=fixture({wrongChain:true});const r=await service.lookup(hash);assert.equal(r.resolvedChain,null);assert.equal(r.onePage.summaryState,'FETCH_FAILED');});
 test('mismatched returned hash is never trusted',async()=>{const {service}=fixture({badHash:true});assert.equal((await service.lookup(hash)).onePage.summaryState,'FETCH_FAILED');});
-test('first provider outage fails over',async()=>{const {service,calls}=fixture({fail:(c,m,u)=>u.includes('ethereum-rpc.publicnode')});const r=await service.lookup(hash,'ethereum');assert.equal(r.resolvedChain,'ethereum');assert.ok(calls.some(c=>c.url?.includes('llamarpc')));});
+test('first provider outage fails over',async()=>{const {service,calls}=fixture({fail:(c,m,u)=>u.includes('ethereum-rpc.publicnode')});const r=await service.lookup(hash,'ethereum');assert.equal(r.resolvedChain,'ethereum');assert.ok(calls.some(c=>c.url===CHAINS.ethereum.rpc[1]));});
 test('no transaction differs from outage',async()=>{const {service}=fixture({matches:[]});const r=await service.lookup(hash);assert.equal(r.onePage.summaryState,'NOT_FOUND');assert.equal(r.resolvedChain,null);});
 test('partial scan outage is never called not found',async()=>{const {service}=fixture({matches:[],fail:c=>c==='polygon'});assert.equal((await service.lookup(hash)).onePage.summaryState,'FETCH_FAILED');});
 test('multiple chain matches are retained',async()=>{const {service}=fixture({matches:['ethereum','polygon']});const r=await service.lookup(hash);assert.equal(r.outputs.length,2);assert.equal(r.resolvedChain,null);assert.match(r.agentHint,/multiple networks/);});
